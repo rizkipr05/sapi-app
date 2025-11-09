@@ -1,21 +1,24 @@
+// WAJIB di paling atas (sebelum import navigasi)
+import 'react-native-gesture-handler';
+
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import 'react-native-gesture-handler';
 
 import { AuthProvider, useAuth } from './src/context/AuthProvider';
 
+import EditProfileScreen from './src/screens/EditProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import ProductDetailScreen from './src/screens/ProductDetailScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
-
-import EditProfileScreen from './src/screens/EditProfileScreen'; // ← sudah ditambahkan
-import ProfileScreen from './src/screens/ProfileScreen'; // ← pastikan ada
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const ProfileStack = createNativeStackNavigator();
+const HomeStack = createNativeStackNavigator();
 
 /* ===================== PROFILE STACK ===================== */
 function ProfileStackScreens() {
@@ -24,6 +27,16 @@ function ProfileStackScreens() {
       <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
       <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
     </ProfileStack.Navigator>
+  );
+}
+
+/* ===================== HOME STACK (list -> detail) ===================== */
+function HomeStackScreen() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="HomeList" component={HomeScreen} />
+      <HomeStack.Screen name="ProductDetail" component={ProductDetailScreen} />
+    </HomeStack.Navigator>
   );
 }
 
@@ -38,9 +51,10 @@ function HomeTabs() {
         tabBarStyle: { backgroundColor: '#e6ead7' },
       }}
     >
+      {/* ⬇️ PAKAI HOME STACK DI SINI, BUKAN HomeScreen LANGSUNG */}
       <Tab.Screen
         name="HomeTab"
-        component={HomeScreen}
+        component={HomeStackScreen}
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
@@ -50,7 +64,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="Cart"
-        component={HomeScreen}
+        component={HomeScreen} // placeholder; nanti ganti ke CartScreen
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, size }) => (
@@ -60,7 +74,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="ProfileTab"
-        component={ProfileStackScreens}   // ← PAKAI STACK DI TAB INI
+        component={ProfileStackScreens}
         options={{
           title: 'Akun',
           tabBarIcon: ({ color, size }) => (
@@ -75,8 +89,7 @@ function HomeTabs() {
 /* ===================== ROOT NAVIGATION ===================== */
 function RootNavigator() {
   const { loading, user } = useAuth();
-
-  if (loading) return null; // bisa ganti splash screen
+  if (loading) return null; // bisa ganti Splash
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
