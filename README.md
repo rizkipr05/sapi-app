@@ -1,50 +1,92 @@
-# Welcome to your Expo app 👋
+# 🐮 SapiMart (React Native UI Only)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**SapiMart** adalah aplikasi mobile berbasis **React Native (Expo)** yang dirancang untuk menampilkan katalog produk hewan ternak — khususnya sapi — dengan antarmuka pengguna modern dan interaktif.  
+Aplikasi ini fokus pada **tampilan (UI only)** dan menyimpan data **secara lokal** menggunakan **AsyncStorage** sebagai simulasi backend.
 
-## Get started
+---
 
-1. Install dependencies
+## 💡 Fitur Utama
 
-   ```bash
-   npm install
-   ```
+### 🔐 Autentikasi Lokal
+- Pengguna dapat **mendaftar (Register)** dan **masuk (Login)**.
+- Data disimpan di perangkat menggunakan AsyncStorage.
+- Validasi username unik & sandi minimal 4 karakter.
+- Auto-login setelah restart aplikasi.
 
-2. Start the app
+### 🏠 Beranda (Home)
+- Menampilkan daftar produk sapi dalam bentuk grid 2 kolom.
+- Fitur pencarian produk (search bar).
+- Klik card produk membuka halaman **Detail Produk**.
 
-   ```bash
-   npx expo start
-   ```
+### 📦 Detail Produk
+- Menampilkan gambar, harga, nama, dan info terjual.
+- Detail tambahan seperti stok, berat, dan ukuran.
+- Tombol aksi: Tanya Penjual, Tambah Keranjang, Beli.
 
-In the output, you'll find options to open the app in a
+### 👤 Profil Pengguna
+- Menampilkan avatar, nama, dan email pengguna.
+- Menu: Edit Profil, Ganti Kata Sandi, History, Tentang, Keluar.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### ✏️ Edit Profil
+- Edit username, email, telepon, dan kata sandi.
+- Data tersimpan otomatis secara lokal.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## ⚙️ Teknologi yang Digunakan
 
-When you're ready, run:
+| Komponen | Teknologi |
+|-----------|------------|
+| Framework | React Native (Expo SDK 54) |
+| Navigasi | React Navigation v7 (Stack & Bottom Tabs) |
+| State Global | Context API |
+| Penyimpanan Lokal | AsyncStorage |
+| Icon | Expo Vector Icons (Ionicons, AntDesign) |
+| Node Version | v20.19.2 |
 
-```bash
-npm run reset-project
+---
+
+## 🧩 Struktur Folder
+```
+project/
+│  App.js
+│  index.js
+│  package.json
+│
+└─ src/
+   ├─ context/
+   │   └─ AuthProvider.js
+   ├─ services/
+   │   ├─ auth.js
+   │   ├─ storage.js
+   │   └─ products.js
+   └─ screens/
+       ├─ LoginScreen.js
+       ├─ RegisterScreen.js
+       ├─ HomeScreen.js
+       ├─ ProductDetailScreen.js
+       ├─ ProfileScreen.js
+       └─ EditProfileScreen.js
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 🎨 Ciri Desain
+- Warna utama: **Hijau Tua (#3f4d0b)**
+- Latar lembut: **Putih & Cream (#f7f5ef)**
+- UI modern: card, tombol rounded, icon halus.
+- Responsif di Android/iOS.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🔍 Tujuan Pengembangan
+1. Melatih pembuatan aplikasi React Native berbasis **UI only**.
+2. Mempelajari **navigasi multi-halaman** dengan Stack & Tab Navigation.
+3. Implementasi **autentikasi lokal sederhana**.
+4. Menyusun struktur kode modular dan reusable.
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🧠 Kesimpulan
+Aplikasi **SapiMart** merupakan contoh ideal pengembangan prototipe e-commerce sederhana berbasis React Native.  
+Dengan desain modern dan penyimpanan lokal, aplikasi ini siap dikembangkan lebih lanjut menjadi sistem belanja ternak digital dengan backend API nyata.
