@@ -47,6 +47,18 @@ export default function HomeScreen() {
             Hai, {user?.username}
           </Text>
         </View>
+
+        {/* Icons sejajar kanan */}
+        <View style={styles.topIcons}>
+          <Pressable style={styles.actionBtn}>
+            <Ionicons name="chatbubbles-outline" size={20} color="#111" />
+          </Pressable>
+
+        <Pressable style={styles.actionBtn}
+          onPress={() => nav.navigate('Favorites')}>
+          <Ionicons name="heart-outline" size={20} color="#111" />
+        </Pressable>
+        </View>
       </View>
 
       {/* search bar */}
@@ -89,13 +101,34 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   top: {
-    height: 64,
+    height: 70,
     backgroundColor: '#f8f6ee',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingTop: 6,
   },
+
+  topIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  actionBtn: {
+    width: 34,
+    height: 34,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+  },
+
   search: {
     margin: 16,
     borderRadius: 8,
@@ -108,6 +141,7 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: '#fff',
   },
+
   card: {
     width: CARD_W,
     backgroundColor: '#fff',

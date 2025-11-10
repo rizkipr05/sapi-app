@@ -30,6 +30,7 @@ function ProfileStackScreens() {
   );
 }
 
+
 /* ===================== HOME STACK (list -> detail) ===================== */
 function HomeStackScreen() {
   return (

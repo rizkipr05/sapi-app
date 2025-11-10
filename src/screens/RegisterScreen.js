@@ -1,17 +1,17 @@
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 
@@ -128,16 +128,10 @@ export default function RegisterScreen({ navigation }) {
           {/* Divider */}
           <Text style={styles.dividerText}>Atau</Text>
 
-          {/* Ikon sosial rapi & sejajar */}
+          {/* Ikon sosial: hanya Google */}
           <View style={styles.socials}>
             <View style={styles.iconWrap}>
               <AntDesign name="google" size={30} color="#111" />
-            </View>
-            <View style={styles.iconWrap}>
-              <AntDesign name="facebook-square" size={30} color="#111" />
-            </View>
-            <View style={styles.iconWrap}>
-              <AntDesign name="apple1" size={30} color="#111" />
             </View>
           </View>
 
@@ -215,7 +209,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 12,
-    columnGap: 40,
   },
   iconWrap: {
     width: 50,
@@ -224,7 +217,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Banner bawah lebar (seperti tombol "Daftar" di login)
+  // Banner bawah lebar
   registerBanner: {
     borderRadius: 16,
     marginTop: 10,
