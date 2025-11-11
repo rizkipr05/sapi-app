@@ -1,5 +1,5 @@
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Image,
@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 
+const headerImg = require("../../assets/images/gambar.png");
+
 const BRAND = "#3f4d0b";
 const BG = "#f7f5ef";
 
@@ -27,7 +29,13 @@ export default function RegisterScreen({ navigation }) {
   const [busy, setBusy] = useState(false);
   const { signup } = useAuth();
 
+  const disabled = useMemo(() => {
+    return busy || !username.trim() || !pwd || !pwd2;
+  }, [busy, username, pwd, pwd2]);
+
   const submit = async () => {
+    if (!username.trim()) return Alert.alert("Validasi", "Nama pengguna wajib diisi.");
+    if (!pwd || !pwd2) return Alert.alert("Validasi", "Sandi dan konfirmasi wajib diisi.");
     if (pwd !== pwd2) return Alert.alert("Validasi", "Konfirmasi sandi tidak sama");
     try {
       setBusy(true);
@@ -47,16 +55,9 @@ export default function RegisterScreen({ navigation }) {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* Header ilustrasi */}
         <View style={styles.header}>
-          <Image
-            source={{
-              uri: "https://raw.githubusercontent.com/encharm/Font-Awesome-SVG-PNG/master/black/png/64/cow.png",
-            }}
-            style={{ width: 130, height: 130 }}
-            resizeMode="contain"
-          />
+          <Image source={headerImg} style={{ width: 130, height: 130 }} resizeMode="contain" />
         </View>
 
-        {/* Sheet full-bleed */}
         <View style={styles.sheet}>
           {/* Username */}
           <View style={styles.inputRow}>
@@ -68,7 +69,9 @@ export default function RegisterScreen({ navigation }) {
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
+              autoCorrect={false}
               returnKeyType="next"
+              accessibilityLabel="Input nama pengguna"
             />
           </View>
 
@@ -83,13 +86,11 @@ export default function RegisterScreen({ navigation }) {
               value={pwd}
               onChangeText={setPwd}
               returnKeyType="next"
+              accessibilityLabel="Input sandi"
+              autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShow1((s) => !s)} hitSlop={10}>
-              <Ionicons
-                name={show1 ? "eye-off-outline" : "eye-outline"}
-                size={18}
-                color="#666"
-              />
+              <Ionicons name={show1 ? "eye-off-outline" : "eye-outline"} size={18} color="#666" />
             </TouchableOpacity>
           </View>
 
@@ -104,41 +105,44 @@ export default function RegisterScreen({ navigation }) {
               value={pwd2}
               onChangeText={setPwd2}
               returnKeyType="done"
+              accessibilityLabel="Input konfirmasi sandi"
+              autoCapitalize="none"
+              onSubmitEditing={submit}
             />
             <TouchableOpacity onPress={() => setShow2((s) => !s)} hitSlop={10}>
-              <Ionicons
-                name={show2 ? "eye-off-outline" : "eye-outline"}
-                size={18}
-                color="#666"
-              />
+              <Ionicons name={show2 ? "eye-off-outline" : "eye-outline"} size={18} color="#666" />
             </TouchableOpacity>
           </View>
 
-          {/* Tombol Daftar */}
+          {/* Tombol Daftar — tetap hijau walau disabled */}
           <Pressable
-            style={[styles.primaryBtn, busy && { opacity: 0.6 }]}
             onPress={submit}
-            disabled={busy}
+            disabled={disabled}
+            style={({ pressed }) => [
+              styles.primaryBtn,
+              pressed && styles.primaryBtnPressed, // efek tekan saja (tidak memengaruhi disabled)
+            ]}
+            accessibilityState={{ disabled }}
+            accessibilityLabel="Tombol daftar"
           >
-            <Text style={styles.primaryText}>
-              {busy ? "Memproses..." : "Daftar"}
-            </Text>
+            <Text style={styles.primaryText}>{busy ? "Memproses..." : "Daftar"}</Text>
           </Pressable>
 
           {/* Divider */}
           <Text style={styles.dividerText}>Atau</Text>
 
-          {/* Ikon sosial: hanya Google */}
+          {/* Ikon sosial */}
           <View style={styles.socials}>
             <View style={styles.iconWrap}>
               <AntDesign name="google" size={30} color="#111" />
             </View>
           </View>
 
-          {/* Banner Masuk (penuh) */}
+          {/* Banner Masuk */}
           <Pressable
             style={[styles.primaryBtn, styles.registerBanner]}
             onPress={() => navigation.goBack()}
+            accessibilityLabel="Tombol masuk"
           >
             <Text style={[styles.primaryText, { color: "#fff" }]}>Masuk</Text>
           </Pressable>
@@ -156,7 +160,6 @@ const styles = StyleSheet.create({
     backgroundColor: BG,
   },
 
-  // FULL-BLEED sheet: nempel kiri-kanan, radius atas saja
   sheet: {
     flex: 1,
     backgroundColor: "#fff",
@@ -164,14 +167,11 @@ const styles = StyleSheet.create({
     marginTop: -20,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-
     paddingHorizontal: 18,
     paddingTop: 18,
     paddingBottom: 24,
-
     borderWidth: 1,
     borderColor: "#e5e7eb",
-
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 10,
@@ -191,11 +191,14 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: "#111" },
 
   primaryBtn: {
-    backgroundColor: BRAND,
+    backgroundColor: BRAND, // selalu hijau
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 16,
     alignItems: "center",
     marginTop: 18,
+  },
+  primaryBtnPressed: {
+    opacity: 0.85, // efek saat ditekan saja
   },
   primaryText: { color: "#fff", fontWeight: "700" },
 
@@ -209,6 +212,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 12,
+    columnGap: 40,
   },
   iconWrap: {
     width: 50,
@@ -217,7 +221,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Banner bawah lebar
   registerBanner: {
     borderRadius: 16,
     marginTop: 10,

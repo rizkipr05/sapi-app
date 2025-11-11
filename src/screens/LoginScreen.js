@@ -18,6 +18,8 @@ import { useAuth } from "../context/AuthProvider";
 const BRAND = "#3f4d0b";
 const BG = "#f7f5ef";
 
+const headerImage = require("../../assets/images/gambar.png");
+
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState("");
   const [pwd, setPwd] = useState("");
@@ -42,13 +44,10 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        
         {/* Header */}
         <View style={styles.header}>
           <Image
-            source={{
-              uri: "https://raw.githubusercontent.com/encharm/Font-Awesome-SVG-PNG/master/black/png/64/cow.png",
-            }}
+            source={headerImage}
             style={{ width: 130, height: 130 }}
             resizeMode="contain"
           />
@@ -106,7 +105,7 @@ export default function LoginScreen({ navigation }) {
 
           <Text style={styles.dividerText}>Atau</Text>
 
-          {/* SOSIAL LOGIN hanya Google */}
+          {/* SOSIAL LOGIN dengan ICON MUNCUL */}
           <View style={styles.socials}>
             <View style={styles.iconWrap}>
               <AntDesign name="google" size={30} color="#111" />
@@ -182,6 +181,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 12,
+    columnGap: 40,
   },
 
   iconWrap: {

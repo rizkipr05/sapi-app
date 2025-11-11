@@ -15,6 +15,11 @@ import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 
+// === Tambahan layar chat ===
+import ChatRoomScreen from './src/screens/ChatRoomScreen';
+import ChatsScreen from './src/screens/ChatsScreen';
+// import FavoritesScreen jika ada
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const ProfileStack = createNativeStackNavigator();
@@ -30,13 +35,15 @@ function ProfileStackScreens() {
   );
 }
 
-
-/* ===================== HOME STACK (list -> detail) ===================== */
+/* ===================== HOME STACK (list -> detail -> chats) ===================== */
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeList" component={HomeScreen} />
       <HomeStack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <HomeStack.Screen name="Chats" component={ChatsScreen} />
+      <HomeStack.Screen name="ChatRoom" component={ChatRoomScreen} />
+      {/* <HomeStack.Screen name="Favorites" component={FavoritesScreen} /> */}
     </HomeStack.Navigator>
   );
 }
@@ -65,7 +72,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="Cart"
-        component={HomeScreen} // placeholder; nanti ganti ke CartScreen
+        component={HomeScreen} // placeholder; ganti ke CartScreen jika sudah ada
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, size }) => (
