@@ -55,8 +55,10 @@ export default function ProfileScreen({ navigation }) {
             label="Ganti Kata Sandi"
             onPress={() => navigation.navigate('EditProfile', { focus: 'password' })}
           />
-          <MenuItem icon="time-outline" label="History" onPress={() => {}} />
-          <MenuItem icon="information-circle-outline" label="Tentang" onPress={() => {}} />
+          <MenuItem 
+          icon="time-outline" 
+          label="History Pesanan" onPress={() => navigation.navigate('Orders')} 
+          />  
 
           {/* Tetap HIJAU + konfirmasi via Modal */}
           <MenuItem icon="log-out-outline" label="Keluar" onPress={openConfirm} />

@@ -1,6 +1,8 @@
+// WAJIB: import yang diperlukan
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCart } from '../context/CardProvider';
 
 const BRAND = '#3f4d0b';
 
@@ -10,13 +12,25 @@ function currency(n) {
   return 'Rp ' + safe.toLocaleString('id-ID');
 }
 
+/** ========== Gambar produk lokal (sapi) ========== */
+const LOCAL_COWS = [
+  require('../../assets/images/Cow_female_black_white.jpg'),
+  require('../../assets/images/sapi-limosin.jpeg'),
+  require('../../assets/images/images.jpeg'),
+  require('../../assets/images/images (1).jpeg'),
+  require('../../assets/images/images (2).jpeg'),
+];
+
+const cowImg = (i = 0) => LOCAL_COWS[i % LOCAL_COWS.length];
+
 export default function ProductDetailScreen({ route, navigation }) {
   const product =
     (route && route.params && route.params.product) || {
       id: 'p-1',
       title: 'Produk',
       price: 0,
-      img: 'https://picsum.photos/seed/product/800/600',
+      index: 0,
+      img: null, // biar pakai gambar lokal default
       seller: undefined,
     };
 
@@ -28,17 +42,37 @@ export default function ProductDetailScreen({ route, navigation }) {
       'https://ui-avatars.com/api/?background=3f4d0b&color=fff&name=P',
   };
 
+  const { add } = useCart();
+
   const onAskSeller = () => {
     navigation.navigate('ChatRoom', { seller, product });
   };
 
   const onAddToCart = () => {
-    console.log('Tambah ke keranjang', product.id);
+    add(product, 1);
+    Alert.alert(
+      'Keranjang',
+      'Produk berhasil ditambahkan ke keranjang.',
+      [
+        { text: 'Tetap di sini' },
+        { text: 'Lihat Keranjang', onPress: () => navigation.navigate('CartTab') },
+      ],
+      { cancelable: true }
+    );
   };
 
   const onBuyNow = () => {
-    console.log('Beli sekarang', product.id);
+    navigation.navigate('Checkout', {
+      items: [{ ...product, qty: 1 }],
+      from: 'product',
+    });
   };
+
+  // ambil gambar dari lokal (sesuai index produk)
+  const imageSource =
+    product.img
+      ? { uri: product.img }
+      : cowImg(product.id ? parseInt(product.id.replace(/\D/g, '')) || 0 : 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -55,10 +89,7 @@ export default function ProductDetailScreen({ route, navigation }) {
 
       {/* Body */}
       <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
-        <Image
-          source={{ uri: product.img || 'https://picsum.photos/seed/placeholder/800/600' }}
-          style={styles.image}
-        />
+        <Image source={imageSource} style={styles.image} />
 
         <View style={styles.body}>
           <Text style={styles.price}>{currency(product.price)}</Text>
@@ -70,13 +101,22 @@ export default function ProductDetailScreen({ route, navigation }) {
           <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center' }}>
             <Image
               source={{ uri: seller.avatar }}
-              style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#eee', marginRight: 10 }}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: '#eee',
+                marginRight: 10,
+              }}
             />
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: '600', color: '#111' }}>{seller.name}</Text>
               <Text style={{ color: '#6b7280', fontSize: 12 }}>Seller ID: {seller.id}</Text>
             </View>
-            <Pressable onPress={onAskSeller} style={[styles.btn, styles.btnAsk, { width: 120 }]}>
+            <Pressable
+              onPress={onAskSeller}
+              style={[styles.btn, styles.btnAsk, { width: 120 }]}
+            >
               <Text style={styles.txtAsk}>Tanya</Text>
             </Pressable>
           </View>

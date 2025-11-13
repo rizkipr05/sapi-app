@@ -1,41 +1,45 @@
-// WAJIB di paling atas (sebelum import navigasi)
 import 'react-native-gesture-handler';
 
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 
 import { AuthProvider, useAuth } from './src/context/AuthProvider';
 
+import { CartProvider } from './src/context/CardProvider';
+
+import { OrderProvider } from './src/context/OrderProvider';
+
+import CartScreen from './src/screens/CardScreen';
+import ChatRoomScreen from './src/screens/ChatRoomScreen';
+import ChatsScreen from './src/screens/ChatsScreen';
+import CheckoutScreen from './src/screens/CheckoutScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import OrderHistoryScreen from './src/screens/OrderHistoryScreen'; // pastikan file ini ada
+import PaymentSuccessScreen from './src/screens/PaymentSuccessScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
-
-// === Tambahan layar chat ===
-import ChatRoomScreen from './src/screens/ChatRoomScreen';
-import ChatsScreen from './src/screens/ChatsScreen';
-// import FavoritesScreen jika ada
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const ProfileStack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
 
-/* ===================== PROFILE STACK ===================== */
 function ProfileStackScreens() {
   return (
     <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
       <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
       <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+      <HomeStack.Screen name="Orders" component={OrderHistoryScreen} />
     </ProfileStack.Navigator>
   );
 }
 
-/* ===================== HOME STACK (list -> detail -> chats) ===================== */
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
@@ -43,12 +47,12 @@ function HomeStackScreen() {
       <HomeStack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <HomeStack.Screen name="Chats" component={ChatsScreen} />
       <HomeStack.Screen name="ChatRoom" component={ChatRoomScreen} />
-      {/* <HomeStack.Screen name="Favorites" component={FavoritesScreen} /> */}
+      <HomeStack.Screen name="Checkout" component={CheckoutScreen} />
+      <HomeStack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
     </HomeStack.Navigator>
   );
 }
 
-/* ===================== HOME TABS ===================== */
 function HomeTabs() {
   return (
     <Tab.Navigator
@@ -59,7 +63,6 @@ function HomeTabs() {
         tabBarStyle: { backgroundColor: '#e6ead7' },
       }}
     >
-      {/* ⬇️ PAKAI HOME STACK DI SINI, BUKAN HomeScreen LANGSUNG */}
       <Tab.Screen
         name="HomeTab"
         component={HomeStackScreen}
@@ -71,8 +74,8 @@ function HomeTabs() {
         }}
       />
       <Tab.Screen
-        name="Cart"
-        component={HomeScreen} // placeholder; ganti ke CartScreen jika sudah ada
+        name="CartTab"
+        component={CartScreen}
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, size }) => (
@@ -94,11 +97,9 @@ function HomeTabs() {
   );
 }
 
-/* ===================== ROOT NAVIGATION ===================== */
 function RootNavigator() {
   const { loading, user } = useAuth();
-  if (loading) return null; // bisa ganti Splash
-
+  if (loading) return null;
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
@@ -113,13 +114,17 @@ function RootNavigator() {
   );
 }
 
-/* ===================== MAIN APP ===================== */
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      <CartProvider>
+        <OrderProvider>
+          {/* HANYA SATU NavigationContainer */}
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </OrderProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }

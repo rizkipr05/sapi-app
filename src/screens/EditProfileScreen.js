@@ -4,7 +4,6 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 import { useAuth } from '../context/AuthProvider';
 
 const BRAND = '#3f4d0b';
-
 export default function EditProfileScreen({ route, navigation }) {
   const { user, updateProfile, changePassword } = useAuth();
   const [username, setUsername] = useState(user?.username || '');
