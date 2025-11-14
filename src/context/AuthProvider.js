@@ -1,69 +1,57 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import * as api from '../services/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const Ctx = createContext(null);
+const AuthContext = createContext(null);
+const STORE_KEY = '@auth_user_v1';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Ambil sesi saat pertama kali render
+  // load user dari storage
   useEffect(() => {
     (async () => {
-      const me = await api.getCurrentUser();
-      if (me) setUser(me);
+      try {
+        const raw = await AsyncStorage.getItem(STORE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setUser(parsed);
+        }
+      } catch {}
       setLoading(false);
     })();
   }, []);
 
-  /* ---------- Auth Core ---------- */
   const signin = async (username, password) => {
-    const res = await api.login({ username, password });
-    setUser(res.user);
-    return res.user;
-  };
+    if (!username) throw new Error('Username wajib diisi');
 
-  // Mendukung (u,p) maupun (u,p,email,phone) — parameter email/phone opsional
-  const signup = async (username, password, email = '', phone = '') => {
-    const res = await api.register({ username, password, email, phone });
-    setUser(res.user);
-    return res.user;
+    // ⬇️ aturan role: kalau username = "seller" → role "seller"
+    const role = username.trim().toLowerCase() === 'seller' ? 'seller' : 'buyer';
+
+    const u = {
+      id: Date.now().toString(),
+      username: username.trim(),
+      email: `${username.trim()}@demo.local`,
+      role,           // ⬅️ PENTING
+    };
+
+    setUser(u);
+    await AsyncStorage.setItem(STORE_KEY, JSON.stringify(u));
+    return u;         // ⬅️ supaya LoginScreen bisa tahu role-nya
   };
 
   const signout = async () => {
-    await api.logout();
     setUser(null);
+    await AsyncStorage.removeItem(STORE_KEY);
   };
 
-  /* ---------- Profile Utils (NEW) ---------- */
-  const updateProfile = async (payload) => {
-    const updated = await api.updateProfile(payload);
-    setUser(updated);
-    return updated;
-  };
-
-  const changePassword = async (oldPassword, newPassword) => {
-    return api.changePassword({ oldPassword, newPassword });
-  };
-
-  const value = useMemo(
-    () => ({
-      user,
-      loading,
-      signin,
-      signup,
-      signout,
-      updateProfile,
-      changePassword,
-    }),
-    [user, loading]
+  return (
+    <AuthContext.Provider value={{ user, loading, signin, signout }}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {
-  const v = useContext(Ctx);
-  if (!v) throw new Error('useAuth must be used inside AuthProvider');
-  return v;
+  return useContext(AuthContext);
 }

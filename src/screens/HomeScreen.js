@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthProvider';
-import { listProducts } from '../services/products';
+import { useProducts } from '../context/ProductProvider';
 
 const CARD_W = (Dimensions.get('window').width - 16 * 2 - 12) / 2;
 
@@ -33,30 +33,22 @@ const COWS = [
 const cowImg = (i = 0) => COWS[i % COWS.length];
 
 export default function HomeScreen() {
-  const [items, setItems] = useState([]);
   const [q, setQ] = useState('');
   const { user } = useAuth();
   const nav = useNavigation();
-
-  useEffect(() => {
-    (async () => {
-      const data = await listProducts();
-      setItems(data || []);
-    })();
-  }, []);
+  const { products, ready } = useProducts();
 
   // filter by title
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter(it => (it?.title || '').toLowerCase().includes(s));
-  }, [q, items]);
+    if (!s) return products;
+    return products.filter((it) => (it?.title || '').toLowerCase().includes(s));
+  }, [q, products]);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f7ef' }}>
       {/* header */}
       <View style={styles.top}>
-        {/* Hapus logo, hanya sapa pengguna */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontWeight: '700', fontSize: 16 }}>
             Hai, {user?.username}
@@ -67,7 +59,7 @@ export default function HomeScreen() {
         <View style={styles.topIcons}>
           <Pressable
             style={styles.actionBtn}
-            onPress={() => nav.navigate('Chats')} // ke list chat
+            onPress={() => nav.navigate('Chats')}
           >
             <Ionicons name="chatbubbles-outline" size={20} color="#111" />
           </Pressable>
@@ -113,7 +105,10 @@ export default function HomeScreen() {
             style={styles.card}
             onPress={() => nav.navigate('ProductDetail', { product: item })}
           >
-            <Image source={cowImg(index)} style={styles.thumb} />
+            <Image
+              source={item.img ? { uri: item.img } : cowImg(index)}
+              style={styles.thumb}
+            />
             <View style={{ padding: 10 }}>
               <Text style={styles.cardTitle} numberOfLines={1}>
                 {item.title}
@@ -124,12 +119,14 @@ export default function HomeScreen() {
           </Pressable>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', marginTop: 40 }}>
-            <Ionicons name="search" size={32} color="#9aa0a6" />
-            <Text style={{ color: '#6b7280', marginTop: 6 }}>
-              Tidak ada hasil untuk “{q}”
-            </Text>
-          </View>
+          ready ? (
+            <View style={{ alignItems: 'center', marginTop: 40 }}>
+              <Ionicons name="search" size={32} color="#9aa0a6" />
+              <Text style={{ color: '#6b7280', marginTop: 6 }}>
+                Tidak ada hasil untuk “{q}”
+              </Text>
+            </View>
+          ) : null
         }
       />
     </View>

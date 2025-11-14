@@ -28,11 +28,20 @@ export default function LoginScreen({ navigation }) {
   const { signin } = useAuth();
 
   const submit = async () => {
+    if (!username.trim() || !pwd) {
+      Alert.alert("Validasi", "Nama pengguna dan sandi wajib diisi.");
+      return;
+    }
+
     try {
       setBusy(true);
+      // signin akan menyimpan user + role di context.
+      // RootNavigator akan otomatis mengarahkan:
+      //  - role === 'seller' -> SellerTabs
+      //  - selain itu       -> BuyerTabs
       await signin(username.trim(), pwd);
     } catch (e) {
-      Alert.alert("Login gagal", e?.message || "Gagal login");
+      Alert.alert("Login gagal", e?.message || "Nama pengguna atau sandi salah.");
     } finally {
       setBusy(false);
     }
@@ -51,15 +60,34 @@ export default function LoginScreen({ navigation }) {
             style={{ width: 130, height: 130 }}
             resizeMode="contain"
           />
+          <Text style={styles.appTitle}>Sava Farm</Text>
+          <Text style={styles.appSub}>
+            Masuk untuk mulai belanja atau mengelola toko Anda.
+          </Text>
         </View>
 
         {/* Sheet */}
         <View style={styles.sheet}>
+          {/* Tagline role */}
+          <View style={styles.roleBadgeRow}>
+            <View style={styles.roleBadgeActive}>
+              <Ionicons name="person-outline" size={14} color="#fff" />
+              <Text style={styles.roleBadgeActiveText}>Pembeli</Text>
+            </View>
+            <View style={styles.roleBadge}>
+              <Ionicons name="storefront-outline" size={14} color={BRAND} />
+              <Text style={styles.roleBadgeText}>Penjual</Text>
+            </View>
+          </View>
+
           {/* Input username */}
+          <View style={styles.inputLabelRow}>
+            <Text style={styles.inputLabel}>Nama Pengguna</Text>
+          </View>
           <View style={styles.inputRow}>
             <Ionicons name="person-outline" size={18} color="#666" />
             <TextInput
-              placeholder="Nama Pengguna"
+              placeholder="Masukkan nama pengguna"
               placeholderTextColor="#9aa0a6"
               style={styles.input}
               value={username}
@@ -69,10 +97,13 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* Input password */}
+          <View style={styles.inputLabelRow}>
+            <Text style={styles.inputLabel}>Kata Sandi</Text>
+          </View>
           <View style={styles.inputRow}>
             <Ionicons name="lock-closed-outline" size={18} color="#666" />
             <TextInput
-              placeholder="Sandi"
+              placeholder="Masukkan kata sandi"
               placeholderTextColor="#9aa0a6"
               style={styles.input}
               secureTextEntry={!show}
@@ -103,12 +134,13 @@ export default function LoginScreen({ navigation }) {
             </Text>
           </Pressable>
 
+
           <Text style={styles.dividerText}>Atau</Text>
 
           {/* SOSIAL LOGIN dengan ICON MUNCUL */}
           <View style={styles.socials}>
             <View style={styles.iconWrap}>
-              <AntDesign name="google" size={30} color="#111" />
+              <AntDesign name="google" size={26} color="#111" />
             </View>
           </View>
 
@@ -126,10 +158,23 @@ export default function LoginScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   header: {
-    height: 220,
+    height: 260,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: BG,
+    paddingHorizontal: 24,
+  },
+  appTitle: {
+    marginTop: 8,
+    fontSize: 22,
+    fontWeight: "800",
+    color: BRAND,
+  },
+  appSub: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center",
   },
 
   sheet: {
@@ -151,14 +196,58 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
+  roleBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  roleBadgeActive: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: BRAND,
+  },
+  roleBadgeActiveText: {
+    fontSize: 12,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  roleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "#e5ead4",
+  },
+  roleBadgeText: {
+    fontSize: 12,
+    color: BRAND,
+    fontWeight: "600",
+  },
+
+  inputLabelRow: {
+    marginTop: 4,
+  },
+  inputLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 6,
+  },
+
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     columnGap: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
-    paddingVertical: 12,
-    marginTop: 8,
+    paddingVertical: 10,
+    marginTop: 4,
   },
   input: { flex: 1, color: "#111" },
 
@@ -170,6 +259,25 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   primaryText: { color: "#fff", fontWeight: "700" },
+
+  infoBox: {
+    marginTop: 14,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#f9fafb",
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  infoTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  infoText: {
+    fontSize: 11,
+    color: "#6b7280",
+  },
 
   dividerText: {
     textAlign: "center",
@@ -189,6 +297,8 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 999,
+    backgroundColor: "#f3f4f6",
   },
 
   registerBanner: {

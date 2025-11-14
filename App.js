@@ -7,39 +7,41 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
 import { AuthProvider, useAuth } from './src/context/AuthProvider';
-
 import { CartProvider } from './src/context/CardProvider';
-
 import { OrderProvider } from './src/context/OrderProvider';
+import { ProductProvider } from './src/context/ProductProvider';
 
+/* ========== Screens (buyer & seller) ========== */
 import CartScreen from './src/screens/CardScreen';
-import ChatRoomScreen from './src/screens/ChatRoomScreen';
-import ChatsScreen from './src/screens/ChatsScreen';
 import CheckoutScreen from './src/screens/CheckoutScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
-import OrderHistoryScreen from './src/screens/OrderHistoryScreen'; // pastikan file ini ada
-import PaymentSuccessScreen from './src/screens/PaymentSuccessScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 
+import ChatRoomScreen from './src/screens/ChatRoomScreen';
+import ChatsScreen from './src/screens/ChatsScreen';
+import OrderHistoryScreen from './src/screens/OrderHistoryScreen';
+import PaymentSuccessScreen from './src/screens/PaymentSuccessScreen';
+
+import AddProductScreen from './src/screens/seller/AddProductScreen';
+import SellerChatRoomScreen from './src/screens/seller/SellerChatRoomScreen';
+import SellerChatsScreen from './src/screens/seller/SellerChatsScreen';
+import SellerHomeScreen from './src/screens/seller/SellerHomeScreen';
+import SellerProductsScreen from './src/screens/seller/SellerProductsScreen';
+import SellerProfileScreen from './src/screens/seller/SellerProfileScreen';
+import SellerSalesHistoryScreen from './src/screens/seller/SellerSalesHistoryScreen';
+
+/* ========== Navigators ========== */
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-const ProfileStack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
+const ProfileStack = createNativeStackNavigator();
+const SellerStack = createNativeStackNavigator();
 
-function ProfileStackScreens() {
-  return (
-    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-      <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
-      <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
-      <HomeStack.Screen name="Orders" component={OrderHistoryScreen} />
-    </ProfileStack.Navigator>
-  );
-}
-
+/* === Buyer stacks/tabs === */
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
@@ -53,7 +55,18 @@ function HomeStackScreen() {
   );
 }
 
-function HomeTabs() {
+function ProfileStackScreens() {
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
+      <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+      {/* Riwayat Order ada di stack Profile */}
+      <ProfileStack.Screen name="Orders" component={OrderHistoryScreen} />
+    </ProfileStack.Navigator>
+  );
+}
+
+function BuyerTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -97,13 +110,68 @@ function HomeTabs() {
   );
 }
 
+/* === Seller stacks/tabs === */
+function SellerStackScreen() {
+  return (
+    <SellerStack.Navigator screenOptions={{ headerShown: false }}>
+      <SellerStack.Screen name="SellerHome" component={SellerHomeScreen} />
+      <SellerStack.Screen name="SellerProfile" component={SellerProfileScreen} />
+      <SellerStack.Screen name="SellerChats" component={SellerChatsScreen} />
+      <SellerStack.Screen name="SellerChatRoom" component={SellerChatRoomScreen} />
+      <SellerStack.Screen name="SellerSalesHistory" component={SellerSalesHistoryScreen} />
+      <SellerStack.Screen name="SellerAddProduct" component={AddProductScreen} />
+      <SellerStack.Screen name="SellerProducts" component={SellerProductsScreen} />
+    </SellerStack.Navigator>
+  );
+}
+
+function SellerTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#3f4d0b',
+        tabBarInactiveTintColor: '#777',
+        tabBarStyle: { backgroundColor: '#e6ead7' },
+      }}
+    >
+      <Tab.Screen
+        name="SellerTabHome"
+        component={SellerStackScreen}
+        options={{
+          title: 'Toko Saya',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="storefront-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="SellerProfile"
+        component={SellerProfileScreen}
+        options={{
+          title: 'Akun',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-circle-outline" color={color} size={size} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+/* === Root Navigator === */
 function RootNavigator() {
   const { loading, user } = useAuth();
   if (loading) return null;
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        <Stack.Screen name="Home" component={HomeTabs} />
+        user.role === 'seller' ? (
+          <Stack.Screen name="SellerRoot" component={SellerTabs} />
+        ) : (
+          <Stack.Screen name="Home" component={BuyerTabs} />
+        )
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
@@ -114,15 +182,17 @@ function RootNavigator() {
   );
 }
 
+/* === App Root (Providers) === */
 export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <OrderProvider>
-          {/* HANYA SATU NavigationContainer */}
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <ProductProvider>
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </ProductProvider>
         </OrderProvider>
       </CartProvider>
     </AuthProvider>

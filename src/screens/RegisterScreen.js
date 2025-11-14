@@ -29,17 +29,28 @@ export default function RegisterScreen({ navigation }) {
   const [busy, setBusy] = useState(false);
   const { signup } = useAuth();
 
-  const disabled = useMemo(() => {
-    return busy || !username.trim() || !pwd || !pwd2;
-  }, [busy, username, pwd, pwd2]);
+  const disabled = useMemo(
+    () => busy || !username.trim() || !pwd || !pwd2,
+    [busy, username, pwd, pwd2]
+  );
 
   const submit = async () => {
-    if (!username.trim()) return Alert.alert("Validasi", "Nama pengguna wajib diisi.");
-    if (!pwd || !pwd2) return Alert.alert("Validasi", "Sandi dan konfirmasi wajib diisi.");
-    if (pwd !== pwd2) return Alert.alert("Validasi", "Konfirmasi sandi tidak sama");
+    if (!username.trim())
+      return Alert.alert("Validasi", "Nama pengguna wajib diisi.");
+    if (!pwd || !pwd2)
+      return Alert.alert("Validasi", "Sandi dan konfirmasi wajib diisi.");
+    if (pwd !== pwd2)
+      return Alert.alert("Validasi", "Konfirmasi sandi tidak sama.");
+
     try {
       setBusy(true);
-      await signup(username.trim(), pwd);
+      await signup(username.trim(), pwd); 
+      Alert.alert("Berhasil", "Akun berhasil dibuat, silakan masuk.", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(), // balik ke login
+        },
+      ]);
     } catch (e) {
       Alert.alert("Daftar gagal", e?.message || "Gagal daftar");
     } finally {
@@ -53,13 +64,36 @@ export default function RegisterScreen({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Header ilustrasi */}
+        {/* Header ilustrasi + judul */}
         <View style={styles.header}>
-          <Image source={headerImg} style={{ width: 130, height: 130 }} resizeMode="contain" />
+          <Image
+            source={headerImg}
+            style={{ width: 130, height: 130 }}
+            resizeMode="contain"
+          />
+          <Text style={styles.appTitle}>Buat Akun Baru</Text>
+          <Text style={styles.appSub}>
+            Daftar untuk mulai belanja sapi di Sava Farm.
+          </Text>
         </View>
 
         <View style={styles.sheet}>
+          {/* Badge info role (informasi saja) */}
+          <View style={styles.roleBadgeRow}>
+            <View style={styles.roleBadgeActive}>
+              <Ionicons name="person-add-outline" size={14} color="#fff" />
+              <Text style={styles.roleBadgeActiveText}>Registrasi Pembeli</Text>
+            </View>
+            <View style={styles.roleBadge}>
+              <Ionicons name="storefront-outline" size={14} color={BRAND} />
+              <Text style={styles.roleBadgeText}>Penjual diatur admin</Text>
+            </View>
+          </View>
+
           {/* Username */}
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>Nama Pengguna</Text>
+          </View>
           <View style={styles.inputRow}>
             <Ionicons name="person-outline" size={18} color="#666" />
             <TextInput
@@ -76,6 +110,9 @@ export default function RegisterScreen({ navigation }) {
           </View>
 
           {/* Sandi */}
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>Kata Sandi</Text>
+          </View>
           <View style={styles.inputRow}>
             <Ionicons name="lock-closed-outline" size={18} color="#666" />
             <TextInput
@@ -90,11 +127,18 @@ export default function RegisterScreen({ navigation }) {
               autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShow1((s) => !s)} hitSlop={10}>
-              <Ionicons name={show1 ? "eye-off-outline" : "eye-outline"} size={18} color="#666" />
+              <Ionicons
+                name={show1 ? "eye-off-outline" : "eye-outline"}
+                size={18}
+                color="#666"
+              />
             </TouchableOpacity>
           </View>
 
           {/* Konfirmasi Sandi */}
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>Konfirmasi Sandi</Text>
+          </View>
           <View style={styles.inputRow}>
             <Ionicons name="lock-closed-outline" size={18} color="#666" />
             <TextInput
@@ -110,8 +154,32 @@ export default function RegisterScreen({ navigation }) {
               onSubmitEditing={submit}
             />
             <TouchableOpacity onPress={() => setShow2((s) => !s)} hitSlop={10}>
-              <Ionicons name={show2 ? "eye-off-outline" : "eye-outline"} size={18} color="#666" />
+              <Ionicons
+                name={show2 ? "eye-off-outline" : "eye-outline"}
+                size={18}
+                color="#666"
+              />
             </TouchableOpacity>
+          </View>
+
+          {/* Info box tentang role */}
+          <View style={styles.infoBox}>
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={18}
+              color={BRAND}
+            />
+            <View style={{ marginLeft: 8, flex: 1 }}>
+              <Text style={styles.infoTitle}>Informasi Role Akun</Text>
+              <Text style={styles.infoText}>
+                Akun yang didaftarkan lewat halaman ini akan menjadi akun
+                pembeli.
+              </Text>
+              <Text style={styles.infoText}>
+                Jika ingin menjadi penjual (seller), hubungi admin untuk
+                mengaktifkan role penjual pada akun Anda.
+              </Text>
+            </View>
           </View>
 
           {/* Tombol Daftar — tetap hijau walau disabled */}
@@ -120,12 +188,14 @@ export default function RegisterScreen({ navigation }) {
             disabled={disabled}
             style={({ pressed }) => [
               styles.primaryBtn,
-              pressed && styles.primaryBtnPressed, // efek tekan saja (tidak memengaruhi disabled)
+              pressed && styles.primaryBtnPressed,
             ]}
             accessibilityState={{ disabled }}
             accessibilityLabel="Tombol daftar"
           >
-            <Text style={styles.primaryText}>{busy ? "Memproses..." : "Daftar"}</Text>
+            <Text style={styles.primaryText}>
+              {busy ? "Memproses..." : "Daftar"}
+            </Text>
           </Pressable>
 
           {/* Divider */}
@@ -154,10 +224,23 @@ export default function RegisterScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   header: {
-    height: 220,
+    height: 240,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: BG,
+    paddingHorizontal: 24,
+  },
+  appTitle: {
+    marginTop: 8,
+    fontSize: 20,
+    fontWeight: "800",
+    color: BRAND,
+  },
+  appSub: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center",
   },
 
   sheet: {
@@ -179,6 +262,50 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
+  roleBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  roleBadgeActive: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: BRAND,
+  },
+  roleBadgeActiveText: {
+    fontSize: 12,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  roleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "#e5ead4",
+  },
+  roleBadgeText: {
+    fontSize: 12,
+    color: BRAND,
+    fontWeight: "600",
+  },
+
+  labelRow: {
+    marginTop: 4,
+  },
+  label: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 4,
+  },
+
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -186,7 +313,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
     paddingVertical: 12,
-    marginTop: 8,
+    marginTop: 4,
   },
   input: { flex: 1, color: "#111" },
 
@@ -198,9 +325,28 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   primaryBtnPressed: {
-    opacity: 0.85, // efek saat ditekan saja
+    opacity: 0.85, // efek saat ditekan
   },
   primaryText: { color: "#fff", fontWeight: "700" },
+
+  infoBox: {
+    marginTop: 14,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#f9fafb",
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  infoTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  infoText: {
+    fontSize: 11,
+    color: "#6b7280",
+  },
 
   dividerText: {
     textAlign: "center",
