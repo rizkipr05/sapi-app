@@ -34,7 +34,7 @@ export default function PaymentSuccessScreen({ route, navigation }) {
 
       <Pressable
         style={styles.linkBtn}
-        onPress={() => navigation.navigate('HomeTab', { screen: 'HomeMain' })}
+        onPress={() => navigation.navigate('HomeTab', { screen: 'HomeList' })}
       >
         <Text style={styles.linkText}>Kembali ke Home</Text>
       </Pressable>

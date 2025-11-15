@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -22,7 +22,8 @@ function currency(n) {
   return 'Rp ' + safe.toLocaleString('id-ID');
 }
 
-/** ========== Gambar sapi lokal ========== */
+/** ========== Gambar sapi lokal SAJA ========== */
+// pastikan file-file ini ada di assets/images
 const COWS = [
   require('../../assets/images/sapi-limosin.jpeg'),
   require('../../assets/images/images.jpeg'),
@@ -44,6 +45,24 @@ export default function HomeScreen() {
     if (!s) return products;
     return products.filter((it) => (it?.title || '').toLowerCase().includes(s));
   }, [q, products]);
+
+  const renderItem = ({ item, index }) => (
+    <Pressable
+      style={styles.card}
+      onPress={() => nav.navigate('ProductDetail', { product: item })}
+    >
+      {/* SELALU gambar lokal */}
+      <Image source={cowImg(index)} style={styles.thumb} />
+
+      <View style={{ padding: 10 }}>
+        <Text style={styles.cardTitle} numberOfLines={1}>
+          {item.title}
+        </Text>
+        <Text style={styles.cardPrice}>{currency(item.price)}</Text>
+        <Text style={styles.cardMeta}>3 Terjual</Text>
+      </View>
+    </Pressable>
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f7ef' }}>
@@ -95,29 +114,12 @@ export default function HomeScreen() {
       {/* grid produk */}
       <FlatList
         data={filtered}
-        keyExtractor={(it) => String(it.id)}
+        keyExtractor={(it, idx) => String(it.id ?? idx)}
         numColumns={2}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         columnWrapperStyle={{ gap: 12 }}
-        renderItem={({ item, index }) => (
-          <Pressable
-            style={styles.card}
-            onPress={() => nav.navigate('ProductDetail', { product: item })}
-          >
-            <Image
-              source={item.img ? { uri: item.img } : cowImg(index)}
-              style={styles.thumb}
-            />
-            <View style={{ padding: 10 }}>
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {item.title}
-              </Text>
-              <Text style={styles.cardPrice}>{currency(item.price)}</Text>
-              <Text style={styles.cardMeta}>3 Terjual</Text>
-            </View>
-          </Pressable>
-        )}
+        renderItem={renderItem}
         ListEmptyComponent={
           ready ? (
             <View style={{ alignItems: 'center', marginTop: 40 }}>

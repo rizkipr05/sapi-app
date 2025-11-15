@@ -1,11 +1,19 @@
 // WAJIB: import yang diperlukan
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useCart } from '../context/CardProvider';
 
 const BRAND = '#3f4d0b';
 
+/* ========= Helper rupiah ========= */
 function currency(n) {
   const num = typeof n === 'string' ? Number(n) : (n ?? 0);
   const safe = Number.isFinite(num) ? num : 0;
@@ -30,7 +38,6 @@ export default function ProductDetailScreen({ route, navigation }) {
       title: 'Produk',
       price: 0,
       index: 0,
-      img: null, // biar pakai gambar lokal default
       seller: undefined,
     };
 
@@ -44,21 +51,22 @@ export default function ProductDetailScreen({ route, navigation }) {
 
   const { add } = useCart();
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const onAskSeller = () => {
     navigation.navigate('ChatRoom', { seller, product });
   };
 
   const onAddToCart = () => {
     add(product, 1);
-    Alert.alert(
-      'Keranjang',
-      'Produk berhasil ditambahkan ke keranjang.',
-      [
-        { text: 'Tetap di sini' },
-        { text: 'Lihat Keranjang', onPress: () => navigation.navigate('CartTab') },
-      ],
-      { cancelable: true }
-    );
+
+    // tampilkan panel sukses
+    setShowSuccess(true);
+  };
+
+  const onGoToCart = () => {
+    setShowSuccess(false);
+    navigation.navigate('CartTab');
   };
 
   const onBuyNow = () => {
@@ -68,11 +76,12 @@ export default function ProductDetailScreen({ route, navigation }) {
     });
   };
 
-  // ambil gambar dari lokal (sesuai index produk)
-  const imageSource =
-    product.img
-      ? { uri: product.img }
-      : cowImg(product.id ? parseInt(product.id.replace(/\D/g, '')) || 0 : 0);
+  // ========= Gambar lokal saja =========
+  const indexFromId = product.id
+    ? parseInt(String(product.id).replace(/\D/g, ''), 10) || 0
+    : 0;
+
+  const imageSource = cowImg(indexFromId);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -88,7 +97,7 @@ export default function ProductDetailScreen({ route, navigation }) {
       </View>
 
       {/* Body */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <Image source={imageSource} style={styles.image} />
 
         <View style={styles.body}>
@@ -153,6 +162,41 @@ export default function ProductDetailScreen({ route, navigation }) {
           <Text style={styles.txtBuy}>Beli</Text>
         </Pressable>
       </View>
+
+      {/* PANEL SUKSES TAMBAH KERANJANG */}
+      {showSuccess && (
+        <View style={styles.successWrap}>
+          <View style={styles.successCard}>
+            <View style={styles.successIcon}>
+              <Ionicons name="checkmark-circle" size={26} color="#16a34a" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.successTitle}>Berhasil ditambahkan</Text>
+              <Text style={styles.successDesc} numberOfLines={2}>
+                Produk sudah masuk ke keranjang belanja kamu.
+              </Text>
+            </View>
+            <Pressable onPress={() => setShowSuccess(false)} hitSlop={8}>
+              <Ionicons name="close" size={18} color="#6b7280" />
+            </Pressable>
+          </View>
+
+          <View style={styles.successActions}>
+            <Pressable
+              style={[styles.successBtn, styles.successBtnOutline]}
+              onPress={() => setShowSuccess(false)}
+            >
+              <Text style={styles.successBtnOutlineText}>Lanjut Belanja</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.successBtn, styles.successBtnPrimary]}
+              onPress={onGoToCart}
+            >
+              <Text style={styles.successBtnPrimaryText}>Lihat Keranjang</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -166,7 +210,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#f8f6ee',
   },
-  title: { fontWeight: '700', color: '#111', fontSize: 16, flex: 1, textAlign: 'center' },
+  title: {
+    fontWeight: '700',
+    color: '#111',
+    fontSize: 16,
+    flex: 1,
+    textAlign: 'center',
+  },
   image: { width: '100%', height: 260, backgroundColor: '#eee' },
   body: { padding: 16 },
   price: { fontSize: 20, fontWeight: '700', color: '#111' },
@@ -176,6 +226,7 @@ const styles = StyleSheet.create({
   sub: { fontWeight: '700', color: '#111' },
   detailRow: { flexDirection: 'row', marginTop: 8 },
   key: { width: 80, color: '#6b7280' },
+
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -201,4 +252,70 @@ const styles = StyleSheet.create({
   txtAsk: { color: '#111', fontWeight: '600' },
   txtCart: { color: BRAND, fontWeight: '700' },
   txtBuy: { color: '#fff', fontWeight: '700' },
+
+  /* ====== SUCCESS PANEL ====== */
+  successWrap: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 70, // di atas footer
+  },
+  successCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: '#ecfdf3',
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    marginBottom: 8,
+  },
+  successIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#dcfce7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  successTitle: {
+    fontWeight: '700',
+    color: '#166534',
+    fontSize: 14,
+  },
+  successDesc: {
+    fontSize: 12,
+    color: '#4b5563',
+    marginTop: 2,
+  },
+  successActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  successBtn: {
+    flex: 1,
+    height: 36,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  successBtnOutline: {
+    borderWidth: 1,
+    borderColor: '#166534',
+    backgroundColor: '#fff',
+  },
+  successBtnPrimary: {
+    backgroundColor: '#166534',
+  },
+  successBtnOutlineText: {
+    color: '#166534',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  successBtnPrimaryText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
 });

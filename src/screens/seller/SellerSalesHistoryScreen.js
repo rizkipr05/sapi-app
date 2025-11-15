@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo } from 'react';
 import {
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { useOrders } from '../../context/OrderProvider';
 
@@ -40,7 +40,7 @@ export default function SellerSalesHistoryScreen({ navigation }) {
       navigation.goBack();
     } else {
       // kembali aman ke halaman utama seller
-      navigation.navigate('SellerHome');
+      navigation.navigate('SellerProfile');
     }
   };
 

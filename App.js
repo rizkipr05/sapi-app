@@ -29,6 +29,7 @@ import PaymentSuccessScreen from './src/screens/PaymentSuccessScreen';
 import AddProductScreen from './src/screens/seller/AddProductScreen';
 import SellerChatRoomScreen from './src/screens/seller/SellerChatRoomScreen';
 import SellerChatsScreen from './src/screens/seller/SellerChatsScreen';
+import SellerEditProfileScreen from './src/screens/seller/SellerEditProfileScreen';
 import SellerHomeScreen from './src/screens/seller/SellerHomeScreen';
 import SellerProductsScreen from './src/screens/seller/SellerProductsScreen';
 import SellerProfileScreen from './src/screens/seller/SellerProfileScreen';
@@ -39,7 +40,11 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
+
+// stack untuk menu toko (home, produk, chat, dll)
 const SellerStack = createNativeStackNavigator();
+// stack khusus tab Akun penjual (profil toko, dll)
+const SellerProfileStack = createNativeStackNavigator();
 
 /* === Buyer stacks/tabs === */
 function HomeStackScreen() {
@@ -60,7 +65,6 @@ function ProfileStackScreens() {
     <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
       <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
       <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
-      {/* Riwayat Order ada di stack Profile */}
       <ProfileStack.Screen name="Orders" component={OrderHistoryScreen} />
     </ProfileStack.Navigator>
   );
@@ -111,17 +115,34 @@ function BuyerTabs() {
 }
 
 /* === Seller stacks/tabs === */
+
+// stack untuk tab "Toko Saya"
 function SellerStackScreen() {
   return (
     <SellerStack.Navigator screenOptions={{ headerShown: false }}>
       <SellerStack.Screen name="SellerHome" component={SellerHomeScreen} />
-      <SellerStack.Screen name="SellerProfile" component={SellerProfileScreen} />
-      <SellerStack.Screen name="SellerChats" component={SellerChatsScreen} />
       <SellerStack.Screen name="SellerChatRoom" component={SellerChatRoomScreen} />
-      <SellerStack.Screen name="SellerSalesHistory" component={SellerSalesHistoryScreen} />
-      <SellerStack.Screen name="SellerAddProduct" component={AddProductScreen} />
       <SellerStack.Screen name="SellerProducts" component={SellerProductsScreen} />
+      <SellerStack.Screen name="SellerAddProduct" component={AddProductScreen} />
+      <SellerStack.Screen name="SellerChats" component={SellerChatsScreen} />
+      <SellerStack.Screen name="SellerSalesHistory" component={SellerSalesHistoryScreen} />
     </SellerStack.Navigator>
+  );
+}
+
+// stack untuk tab "Akun" penjual
+function SellerProfileStackScreen() {
+  return (
+    <SellerProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <SellerProfileStack.Screen
+        name="SellerProfileMain"
+        component={SellerProfileScreen}
+      />
+      <SellerProfileStack.Screen
+        name="SellerEditProfile"
+        component={SellerEditProfileScreen}
+      />
+    </SellerProfileStack.Navigator>
   );
 }
 
@@ -147,7 +168,7 @@ function SellerTabs() {
       />
       <Tab.Screen
         name="SellerProfile"
-        component={SellerProfileScreen}
+        component={SellerProfileStackScreen}
         options={{
           title: 'Akun',
           tabBarIcon: ({ color, size }) => (

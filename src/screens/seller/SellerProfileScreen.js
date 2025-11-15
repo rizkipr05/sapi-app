@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    Image,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { useAuth } from '../../context/AuthProvider';
 
@@ -28,6 +28,21 @@ export default function SellerProfileScreen({ navigation }) {
   const storeName = user?.storeName || user?.username || 'Toko Saya';
   const email = user?.email || '-';
   const roleLabel = 'Akun Penjual';
+
+  // >>>>>>>>>>>>>>>>>> KE PROFIL TOKO (EDIT) <<<<<<<<<<<<<<<<<<
+  const goToStoreProfile = () => {
+    const parent = navigation.getParent?.();
+
+    if (parent) {
+      // Pindah ke tab "Toko Saya" lalu buka SellerEditProfile di stack
+      parent.navigate('SellerTabHome', {
+        screen: 'SellerEditProfile',
+      });
+    } else {
+      // fallback kalau tidak ada parent (jarang terjadi)
+      navigation.navigate('SellerEditProfile');
+    }
+  };
 
   return (
     <>
@@ -56,49 +71,14 @@ export default function SellerProfileScreen({ navigation }) {
 
         {/* MENU LIST PENJUAL */}
         <View style={styles.list}>
-          <SectionTitle label="Pengaturan Toko" />
-
-          <MenuItem
-            icon="create-outline"
-            label="Profil Toko"
-            desc="Nama toko, alamat, kontak"
-            onPress={() => navigation.navigate('SellerEditProfile')}
-          />
-
-          <MenuItem
-            icon="cube-outline"
-            label="Produk Saya"
-            desc="Kelola daftar produk"
-            onPress={() => navigation.navigate('SellerProducts')}
-          />
-
-          <MenuItem
-            icon="add-circle-outline"
-            label="Tambah Produk"
-            desc="Upload produk baru"
-            onPress={() => navigation.navigate('SellerAddProduct')}
-          />
-
-          <SectionTitle label="Transaksi & Pelanggan" />
-
-          <MenuItem
-            icon="chatbubbles-outline"
-            label="Chat Customer"
-            desc="Balas pesan dari pembeli"
-            onPress={() => navigation.navigate('SellerChats')}
-          />
-
-          <MenuItem
-            icon="receipt-outline"
-            label="Riwayat Penjualan"
-            desc="Lihat pesanan yang masuk"
-            onPress={() => navigation.navigate('SellerSalesHistory')}
-          />
-
-          <SectionTitle label="Lainnya" />
+        <MenuItem
+        icon="create-outline"
+        label="Profil Toko"
+        desc="Nama toko, alamat, kontak"
+        onPress={() => navigation.navigate('SellerEditProfile')}
+        />
 
 
-          {/* Logout dengan konfirmasi */}
           <MenuItem
             icon="log-out-outline"
             label="Keluar"
@@ -143,14 +123,6 @@ export default function SellerProfileScreen({ navigation }) {
         </View>
       </Modal>
     </>
-  );
-}
-
-function SectionTitle({ label }) {
-  return (
-    <Text style={styles.sectionTitle}>
-      {label}
-    </Text>
   );
 }
 
@@ -221,15 +193,6 @@ const styles = StyleSheet.create({
 
   list: { padding: 16, gap: 8 },
 
-  sectionTitle: {
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    color: '#9ca3af',
-    marginTop: 10,
-    marginBottom: 4,
-  },
-
   item: {
     backgroundColor: BRAND,
     borderRadius: 10,
@@ -258,7 +221,6 @@ const styles = StyleSheet.create({
   itemTextDanger: { color: '#b91c1c' },
   itemDesc: { fontSize: 11, color: '#e5e7eb', marginTop: 2 },
 
-  // Modal overlay tengah
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.38)',

@@ -1,15 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useRef, useState } from 'react';
 import {
-    FlatList,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import { useAuth } from '../context/AuthProvider';
 
@@ -18,6 +18,7 @@ const BRAND = '#3f4d0b';
 export default function ChatRoomScreen({ route, navigation }) {
   const { user } = useAuth();
   const { seller: sellerParam, product } = route.params || {};
+
   const seller = useMemo(
     () =>
       sellerParam || {
@@ -47,24 +48,27 @@ export default function ChatRoomScreen({ route, navigation }) {
         ]
       : []),
   ]);
+
   const [text, setText] = useState('');
   const listRef = useRef(null);
 
   const send = () => {
     const t = text.trim();
     if (!t) return;
+
     const meMsg = {
       id: 'm' + (messages.length + 1),
       text: t,
       senderId: user?.id || 'me',
       createdAt: Date.now(),
     };
-    setMessages((prev) => [...prev, meMsg]);
+
+    setMessages(prev => [...prev, meMsg]);
     setText('');
 
     // auto-reply dummy
     setTimeout(() => {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         {
           id: 'm' + (prev.length + 1),
@@ -75,7 +79,10 @@ export default function ChatRoomScreen({ route, navigation }) {
       ]);
       listRef.current?.scrollToEnd({ animated: true });
     }, 600);
-    requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
+
+    requestAnimationFrame(() =>
+      listRef.current?.scrollToEnd({ animated: true })
+    );
   };
 
   const renderItem = ({ item }) => {
@@ -105,7 +112,7 @@ export default function ChatRoomScreen({ route, navigation }) {
           <Ionicons name="chevron-back" size={22} color="#111" />
         </Pressable>
 
-        {/* Seller + product preview */}
+        {/* Seller + product title singkat */}
         <View style={{ flex: 1, marginHorizontal: 12 }}>
           <Text numberOfLines={1} style={{ fontWeight: '700', color: '#111' }}>
             {seller.name}
@@ -117,17 +124,11 @@ export default function ChatRoomScreen({ route, navigation }) {
           ) : null}
         </View>
 
-        {product ? (
-          <Image
-            source={{ uri: product.img }}
-            style={{ width: 32, height: 32, borderRadius: 6 }}
-          />
-        ) : (
-          <View style={{ width: 32 }} />
-        )}
+        {/* Spacer kanan (tanpa gambar) */}
+        <View style={{ width: 32 }} />
       </View>
 
-      {/* Messages */}
+      {/* Messages + input */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -137,12 +138,13 @@ export default function ChatRoomScreen({ route, navigation }) {
           ref={listRef}
           data={messages}
           renderItem={renderItem}
-          keyExtractor={(it) => it.id}
+          keyExtractor={it => it.id}
           contentContainerStyle={{ padding: 12, paddingBottom: 8 }}
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+          onContentSizeChange={() =>
+            listRef.current?.scrollToEnd({ animated: true })
+          }
         />
 
-        {/* Input */}
         <View style={styles.inputBar}>
           <TextInput
             value={text}
