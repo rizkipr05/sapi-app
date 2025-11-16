@@ -31,10 +31,9 @@ export default function OrderHistoryScreen({ navigation }) {
   const { orders, clear } = useOrders();
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // BALIK HANYA KE PROFIL (ProfileMain)
   const onBack = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
+    navigation.navigate('ProfileMain');
   };
 
   const openConfirm = () => setShowConfirm(true);
@@ -172,7 +171,7 @@ const styles = StyleSheet.create({
   val: { color: '#111' },
   addr: { color: '#6b7280', marginTop: 8, fontSize: 12 },
 
-  /* ==== Modal styles (mirip dialog logout) ==== */
+  /* ==== Modal styles ==== */
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.38)',

@@ -35,20 +35,27 @@ export default function RegisterScreen({ navigation }) {
   );
 
   const submit = async () => {
-    if (!username.trim())
-      return Alert.alert("Validasi", "Nama pengguna wajib diisi.");
-    if (!pwd || !pwd2)
-      return Alert.alert("Validasi", "Sandi dan konfirmasi wajib diisi.");
-    if (pwd !== pwd2)
-      return Alert.alert("Validasi", "Konfirmasi sandi tidak sama.");
+    if (!username.trim()) {
+      Alert.alert("Validasi", "Nama pengguna wajib diisi.");
+      return;
+    }
+    if (!pwd || !pwd2) {
+      Alert.alert("Validasi", "Sandi dan konfirmasi wajib diisi.");
+      return;
+    }
+    if (pwd !== pwd2) {
+      Alert.alert("Validasi", "Konfirmasi sandi tidak sama.");
+      return;
+    }
 
     try {
       setBusy(true);
-      await signup(username.trim(), pwd); 
+      // daftar akun pembeli (role buyer diatur di AuthProvider)
+      await signup(username.trim(), pwd);
       Alert.alert("Berhasil", "Akun berhasil dibuat, silakan masuk.", [
         {
           text: "OK",
-          onPress: () => navigation.goBack(), // balik ke login
+          onPress: () => navigation.navigate("Login"), // langsung arahkan ke Login
         },
       ]);
     } catch (e) {
@@ -182,13 +189,14 @@ export default function RegisterScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Tombol Daftar — tetap hijau walau disabled */}
+          {/* Tombol Daftar */}
           <Pressable
             onPress={submit}
             disabled={disabled}
             style={({ pressed }) => [
               styles.primaryBtn,
               pressed && styles.primaryBtnPressed,
+              disabled && { opacity: 0.6 },
             ]}
             accessibilityState={{ disabled }}
             accessibilityLabel="Tombol daftar"
@@ -211,7 +219,7 @@ export default function RegisterScreen({ navigation }) {
           {/* Banner Masuk */}
           <Pressable
             style={[styles.primaryBtn, styles.registerBanner]}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate("Login")}
             accessibilityLabel="Tombol masuk"
           >
             <Text style={[styles.primaryText, { color: "#fff" }]}>Masuk</Text>
@@ -318,14 +326,14 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: "#111" },
 
   primaryBtn: {
-    backgroundColor: BRAND, // selalu hijau
+    backgroundColor: BRAND,
     paddingVertical: 12,
     borderRadius: 16,
     alignItems: "center",
     marginTop: 18,
   },
   primaryBtnPressed: {
-    opacity: 0.85, // efek saat ditekan
+    opacity: 0.85,
   },
   primaryText: { color: "#fff", fontWeight: "700" },
 

@@ -25,6 +25,9 @@ export default function LoginScreen({ navigation }) {
   const [pwd, setPwd] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  // pastikan di AuthProvider: signin meng-set user + role di context
+  // idealnya signin me-return user yang baru login
   const { signin } = useAuth();
 
   const submit = async () => {
@@ -35,13 +38,39 @@ export default function LoginScreen({ navigation }) {
 
     try {
       setBusy(true);
-      // signin akan menyimpan user + role di context.
-      // RootNavigator akan otomatis mengarahkan:
-      //  - role === 'seller' -> SellerTabs
-      //  - selain itu       -> BuyerTabs
-      await signin(username.trim(), pwd);
+
+      // 👉 signin harus meng-handle role: "buyer" / "seller"
+      // usahakan signin me-return objek user, misalnya:
+      // { id, username, role, ... }
+      const loggedUser = await signin(username.trim(), pwd);
+
+      // kalau signin tidak me-return apa-apa, loggedUser bisa undefined,
+      // tapi user di context tetap ter-update; di sini kita cek loggedUser
+      if (loggedUser && loggedUser.role === "seller") {
+        // Seller → pindah ke stack seller
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "SellerRoot" }],
+        });
+      } else if (loggedUser) {
+        // Buyer (atau role lain selain seller) → ke Home (BuyerTabs)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
+      } else {
+        // fallback kalau signin tidak mengembalikan user
+        // (biar nggak nganggur di halaman login)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
+      }
     } catch (e) {
-      Alert.alert("Login gagal", e?.message || "Nama pengguna atau sandi salah.");
+      Alert.alert(
+        "Login gagal",
+        e?.message || "Nama pengguna atau sandi salah."
+      );
     } finally {
       setBusy(false);
     }
@@ -68,7 +97,7 @@ export default function LoginScreen({ navigation }) {
 
         {/* Sheet */}
         <View style={styles.sheet}>
-          {/* Tagline role */}
+          {/* Tagline role (visual saja) */}
           <View style={styles.roleBadgeRow}>
             <View style={styles.roleBadgeActive}>
               <Ionicons name="person-outline" size={14} color="#fff" />
@@ -93,6 +122,7 @@ export default function LoginScreen({ navigation }) {
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
+              autoCorrect={false}
             />
           </View>
 
@@ -109,6 +139,7 @@ export default function LoginScreen({ navigation }) {
               secureTextEntry={!show}
               value={pwd}
               onChangeText={setPwd}
+              autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShow((s) => !s)} hitSlop={10}>
               <Ionicons
@@ -134,10 +165,9 @@ export default function LoginScreen({ navigation }) {
             </Text>
           </Pressable>
 
-
           <Text style={styles.dividerText}>Atau</Text>
 
-          {/* SOSIAL LOGIN dengan ICON MUNCUL */}
+          {/* SOSIAL LOGIN */}
           <View style={styles.socials}>
             <View style={styles.iconWrap}>
               <AntDesign name="google" size={26} color="#111" />
@@ -148,7 +178,9 @@ export default function LoginScreen({ navigation }) {
             style={[styles.primaryBtn, styles.registerBanner]}
             onPress={() => navigation.navigate("Register")}
           >
-            <Text style={[styles.primaryText, { color: "#fff" }]}>Daftar</Text>
+            <Text style={[styles.primaryText, { color: "#fff" }]}>
+              Daftar
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -259,25 +291,6 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   primaryText: { color: "#fff", fontWeight: "700" },
-
-  infoBox: {
-    marginTop: 14,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#f9fafb",
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  infoTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 2,
-  },
-  infoText: {
-    fontSize: 11,
-    color: "#6b7280",
-  },
 
   dividerText: {
     textAlign: "center",

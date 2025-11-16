@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
+  Alert,
   FlatList,
   Image,
   Modal,
@@ -9,6 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useAuth } from '../context/AuthProvider';
 import { useCart } from '../context/CardProvider';
 
 const BRAND = '#3f4d0b';
@@ -22,6 +24,7 @@ function currency(n) {
 
 export default function CartScreen({ navigation }) {
   const { items, setQty, remove, clear, subtotal } = useCart();
+  const { user } = useAuth(); // <-- cek user
 
   const [showModal, setShowModal] = useState(false);
   const [targetItem, setTargetItem] = useState(null);
@@ -40,13 +43,17 @@ export default function CartScreen({ navigation }) {
     <View style={styles.row}>
       <Image source={{ uri: item.img }} style={styles.thumb} />
       <View style={{ flex: 1, paddingRight: 8 }}>
-        <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+        <Text style={styles.title} numberOfLines={2}>
+          {item.title}
+        </Text>
         <Text style={styles.price}>{currency(item.price)}</Text>
 
         <View style={styles.qtyRow}>
           <Pressable
             style={styles.qtyBtn}
-            onPress={() => setQty(item.id, Math.max(1, (item.qty || 1) - 1))}
+            onPress={() =>
+              setQty(item.id, Math.max(1, (item.qty || 1) - 1))
+            }
           >
             <Ionicons name="remove" size={16} color="#111" />
           </Pressable>
@@ -71,9 +78,16 @@ export default function CartScreen({ navigation }) {
     return (
       <View style={styles.emptyWrap}>
         <Ionicons name="cart-outline" size={48} color="#9ca3af" />
-        <Text style={{ color: '#6b7280', marginTop: 8 }}>Keranjang kosong</Text>
-        <Pressable style={styles.backBtn} onPress={() => navigation.navigate('HomeTab')}>
-          <Text style={{ color: '#fff', fontWeight: '700' }}>Belanja Sekarang</Text>
+        <Text style={{ color: '#6b7280', marginTop: 8 }}>
+          Keranjang kosong
+        </Text>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => navigation.navigate('HomeTab')}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700' }}>
+            Belanja Sekarang
+          </Text>
         </Pressable>
       </View>
     );
@@ -84,7 +98,9 @@ export default function CartScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Keranjang</Text>
         <Pressable onPress={clear}>
-          <Text style={{ color: '#ef4444', fontWeight: '600' }}>Kosongkan</Text>
+          <Text style={{ color: '#ef4444', fontWeight: '600' }}>
+            Kosongkan
+          </Text>
         </Pressable>
       </View>
 
@@ -99,14 +115,28 @@ export default function CartScreen({ navigation }) {
       <View style={styles.footer}>
         <View style={{ flex: 1 }}>
           <Text style={{ color: '#6b7280' }}>Subtotal</Text>
-          <Text style={{ fontWeight: '800', fontSize: 18 }}>{currency(subtotal)}</Text>
+          <Text style={{ fontWeight: '800', fontSize: 18 }}>
+            {currency(subtotal)}
+          </Text>
         </View>
 
         <Pressable
           style={styles.checkout}
-          onPress={() =>
-            navigation.navigate('Checkout', { items: [], from: 'cart' })
-          }
+          onPress={() => {
+            if (!user) {
+              Alert.alert(
+                'Login dibutuhkan',
+                'Silakan login terlebih dahulu sebelum melakukan checkout.',
+                [
+                  { text: 'Batal', style: 'cancel' },
+                  { text: 'Login', onPress: () => navigation.navigate('Login') },
+                ]
+              );
+              return;
+            }
+
+            navigation.navigate('Checkout', { items: [], from: 'cart' });
+          }}
         >
           <Text style={{ color: '#fff', fontWeight: '700' }}>Checkout</Text>
         </Pressable>
@@ -121,7 +151,11 @@ export default function CartScreen({ navigation }) {
             </View>
             <Text style={styles.modalTitle}>Hapus Item</Text>
             <Text style={styles.modalMsg}>
-              Apakah Anda yakin ingin menghapus {targetItem?.title ? `"${targetItem.title}"` : 'item ini'} dari keranjang?
+              Apakah Anda yakin ingin menghapus{' '}
+              {targetItem?.title
+                ? `"${targetItem.title}"`
+                : 'item ini'}{' '}
+              dari keranjang?
             </Text>
             <View style={styles.modalBtns}>
               <Pressable
@@ -162,7 +196,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   sep: { height: 1, backgroundColor: '#f1f5f9', marginLeft: 88 },
-  thumb: { width: 72, height: 72, borderRadius: 10, marginRight: 12, backgroundColor: '#eee' },
+  thumb: {
+    width: 72,
+    height: 72,
+    borderRadius: 10,
+    marginRight: 12,
+    backgroundColor: '#eee',
+  },
   title: { color: '#111', fontWeight: '700' },
   price: { color: '#111', marginTop: 4 },
   qtyRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },

@@ -1,3 +1,4 @@
+// WAJIB di paling atas
 import 'react-native-gesture-handler';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -55,7 +56,10 @@ function HomeStackScreen() {
       <HomeStack.Screen name="Chats" component={ChatsScreen} />
       <HomeStack.Screen name="ChatRoom" component={ChatRoomScreen} />
       <HomeStack.Screen name="Checkout" component={CheckoutScreen} />
-      <HomeStack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
+      <HomeStack.Screen
+        name="PaymentSuccess"
+        component={PaymentSuccessScreen}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -71,6 +75,8 @@ function ProfileStackScreens() {
 }
 
 function BuyerTabs() {
+  const { user } = useAuth(); // pakai user di sini
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -90,6 +96,7 @@ function BuyerTabs() {
           ),
         }}
       />
+
       <Tab.Screen
         name="CartTab"
         component={CartScreen}
@@ -100,6 +107,7 @@ function BuyerTabs() {
           ),
         }}
       />
+
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStackScreens}
@@ -109,6 +117,15 @@ function BuyerTabs() {
             <Ionicons name="person-circle-outline" color={color} size={size} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            // kalau belum login, cegah pindah tab & arahkan ke Login
+            if (!user) {
+              e.preventDefault();
+              navigation.navigate('Login');
+            }
+          },
+        })}
       />
     </Tab.Navigator>
   );
@@ -121,11 +138,23 @@ function SellerStackScreen() {
   return (
     <SellerStack.Navigator screenOptions={{ headerShown: false }}>
       <SellerStack.Screen name="SellerHome" component={SellerHomeScreen} />
-      <SellerStack.Screen name="SellerChatRoom" component={SellerChatRoomScreen} />
-      <SellerStack.Screen name="SellerProducts" component={SellerProductsScreen} />
-      <SellerStack.Screen name="SellerAddProduct" component={AddProductScreen} />
+      <SellerStack.Screen
+        name="SellerChatRoom"
+        component={SellerChatRoomScreen}
+      />
+      <SellerStack.Screen
+        name="SellerProducts"
+        component={SellerProductsScreen}
+      />
+      <SellerStack.Screen
+        name="SellerAddProduct"
+        component={AddProductScreen}
+      />
       <SellerStack.Screen name="SellerChats" component={SellerChatsScreen} />
-      <SellerStack.Screen name="SellerSalesHistory" component={SellerSalesHistoryScreen} />
+      <SellerStack.Screen
+        name="SellerSalesHistory"
+        component={SellerSalesHistoryScreen}
+      />
     </SellerStack.Navigator>
   );
 }
@@ -185,20 +214,23 @@ function RootNavigator() {
   const { loading, user } = useAuth();
   if (loading) return null;
 
+  // 👉 Seller dipisah sendiri
+  if (user?.role === 'seller') {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="SellerRoot" component={SellerTabs} />
+      </Stack.Navigator>
+    );
+  }
+
+  // 👉 Selain seller (termasuk BELUM LOGIN) selalu mulai dari Home (BuyerTabs)
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
-        user.role === 'seller' ? (
-          <Stack.Screen name="SellerRoot" component={SellerTabs} />
-        ) : (
-          <Stack.Screen name="Home" component={BuyerTabs} />
-        )
-      ) : (
-        <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        </>
-      )}
+      {/* Ini jadi tampilan awal saat app dibuka */}
+      <Stack.Screen name="Home" component={BuyerTabs} />
+      {/* Login & Register bisa dipanggil kapan saja lewat navigation.navigate */}
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
     </Stack.Navigator>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../context/AuthProvider';
 import { useProducts } from '../context/ProductProvider';
 
+const BRAND = '#3f4d0b';
 const CARD_W = (Dimensions.get('window').width - 16 * 2 - 12) / 2;
 
 function currency(n) {
@@ -22,8 +23,7 @@ function currency(n) {
   return 'Rp ' + safe.toLocaleString('id-ID');
 }
 
-/** ========== Gambar sapi lokal SAJA ========== */
-// pastikan file-file ini ada di assets/images
+/** ========== Gambar sapi lokal ========== */
 const COWS = [
   require('../../assets/images/sapi-limosin.jpeg'),
   require('../../assets/images/images.jpeg'),
@@ -35,7 +35,7 @@ const cowImg = (i = 0) => COWS[i % COWS.length];
 
 export default function HomeScreen() {
   const [q, setQ] = useState('');
-  const { user } = useAuth();
+  const { user } = useAuth(); // cek login
   const nav = useNavigation();
   const { products, ready } = useProducts();
 
@@ -51,7 +51,7 @@ export default function HomeScreen() {
       style={styles.card}
       onPress={() => nav.navigate('ProductDetail', { product: item })}
     >
-      {/* SELALU gambar lokal */}
+      {/* Selalu pakai gambar lokal */}
       <Image source={cowImg(index)} style={styles.thumb} />
 
       <View style={{ padding: 10 }}>
@@ -66,33 +66,53 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f7ef' }}>
-      {/* header */}
+      {/* HEADER --------------------------------------- */}
       <View style={styles.top}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{ fontWeight: '700', fontSize: 16 }}>
-            Hai, {user?.username}
-          </Text>
-        </View>
+        <Text style={{ fontWeight: '700', fontSize: 16 }}>
+          Hai, {user?.username || 'Pengunjung'}
+        </Text>
 
-        {/* Icons kanan */}
-        <View style={styles.topIcons}>
-          <Pressable
-            style={styles.actionBtn}
-            onPress={() => nav.navigate('Chats')}
-          >
-            <Ionicons name="chatbubbles-outline" size={20} color="#111" />
-          </Pressable>
+        {/* ========== LOGIC LOGIN ========== */}
+        {user ? (
+          // Jika sudah login → icon chat & favorite
+          <View style={styles.topIcons}>
+            <Pressable
+              style={styles.actionBtn}
+              onPress={() => nav.navigate('Chats')}
+            >
+              <Ionicons name="chatbubbles-outline" size={20} color="#111" />
+            </Pressable>
 
-          <Pressable
-            style={styles.actionBtn}
-            onPress={() => nav.navigate('Favorites')}
-          >
-            <Ionicons name="heart-outline" size={20} color="#111" />
-          </Pressable>
-        </View>
+            <Pressable
+              style={styles.actionBtn}
+              onPress={() => nav.navigate('Favorites')}
+            >
+              <Ionicons name="heart-outline" size={20} color="#111" />
+            </Pressable>
+          </View>
+        ) : (
+          // Jika belum login → tombol Login & Daftar
+          <View style={styles.topAuth}>
+            <Pressable
+              style={styles.authBtn}
+              onPress={() => nav.navigate('Login')}
+            >
+              <Text style={styles.authText}>Masuk</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.authBtn, styles.authBtnOutline]}
+              onPress={() => nav.navigate('Register')}
+            >
+              <Text style={[styles.authText, styles.authTextOutline]}>
+                Daftar
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </View>
 
-      {/* search bar */}
+      {/* SEARCH BAR ---------------------------------- */}
       <View style={styles.search}>
         <Ionicons name="search-outline" size={18} color="#888" />
         <TextInput
@@ -111,7 +131,7 @@ export default function HomeScreen() {
         ) : null}
       </View>
 
-      {/* grid produk */}
+      {/* GRID PRODUK -------------------------------- */}
       <FlatList
         data={filtered}
         keyExtractor={(it, idx) => String(it.id ?? idx)}
@@ -143,8 +163,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 6,
   },
+
+  // BUTTON LOGIN REGISTER
+  topAuth: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  authBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  authBtnOutline: {
+    backgroundColor: BRAND,
+    borderColor: BRAND,
+  },
+  authText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#111',
+  },
+  authTextOutline: {
+    color: '#fff',
+  },
+
+  // ICONS LOGIN
   topIcons: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -162,6 +210,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
   },
+
   search: {
     margin: 16,
     borderRadius: 8,
@@ -174,6 +223,7 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: '#fff',
   },
+
   card: {
     width: CARD_W,
     backgroundColor: '#fff',

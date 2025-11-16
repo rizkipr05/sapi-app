@@ -3,12 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { useAuth } from '../context/AuthProvider';
 import { useCart } from '../context/CardProvider';
 
 const BRAND = '#3f4d0b';
@@ -50,18 +52,42 @@ export default function ProductDetailScreen({ route, navigation }) {
   };
 
   const { add } = useCart();
+  const { user } = useAuth(); // cek user login
 
+  // modal sukses tambah keranjang
   const [showSuccess, setShowSuccess] = useState(false);
+  // modal wajib login
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginTarget, setLoginTarget] = useState(''); // 'cart' | 'buy' | 'chat'
+
+  const openLoginModal = (target) => {
+    setLoginTarget(target);
+    setShowLoginModal(true);
+  };
+
+  const goLogin = () => {
+    setShowLoginModal(false);
+    navigation.navigate('Login');
+  };
 
   const onAskSeller = () => {
+    // WAJIB LOGIN untuk chat
+    if (!user) {
+      openLoginModal('chat');
+      return;
+    }
     navigation.navigate('ChatRoom', { seller, product });
   };
 
   const onAddToCart = () => {
-    add(product, 1);
+    // WAJIB LOGIN untuk tambah keranjang
+    if (!user) {
+      openLoginModal('cart');
+      return;
+    }
 
-    // tampilkan panel sukses
-    setShowSuccess(true);
+    add(product, 1);
+    setShowSuccess(true); // tampilkan modal sukses
   };
 
   const onGoToCart = () => {
@@ -70,6 +96,12 @@ export default function ProductDetailScreen({ route, navigation }) {
   };
 
   const onBuyNow = () => {
+    // WAJIB LOGIN untuk beli
+    if (!user) {
+      openLoginModal('buy');
+      return;
+    }
+
     navigation.navigate('Checkout', {
       items: [{ ...product, qty: 1 }],
       from: 'product',
@@ -80,8 +112,15 @@ export default function ProductDetailScreen({ route, navigation }) {
   const indexFromId = product.id
     ? parseInt(String(product.id).replace(/\D/g, ''), 10) || 0
     : 0;
-
   const imageSource = cowImg(indexFromId);
+
+  // teks berbeda tergantung target login
+  const loginMessage =
+    loginTarget === 'cart'
+      ? 'Silakan login terlebih dahulu untuk menambahkan produk ke keranjang.'
+      : loginTarget === 'buy'
+      ? 'Silakan login terlebih dahulu untuk melanjutkan pembelian.'
+      : 'Silakan login terlebih dahulu untuk bertanya ke penjual.';
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -120,7 +159,9 @@ export default function ProductDetailScreen({ route, navigation }) {
             />
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: '600', color: '#111' }}>{seller.name}</Text>
-              <Text style={{ color: '#6b7280', fontSize: 12 }}>Seller ID: {seller.id}</Text>
+              <Text style={{ color: '#6b7280', fontSize: 12 }}>
+                Seller ID: {seller.id}
+              </Text>
             </View>
             <Pressable
               onPress={onAskSeller}
@@ -163,40 +204,81 @@ export default function ProductDetailScreen({ route, navigation }) {
         </Pressable>
       </View>
 
-      {/* PANEL SUKSES TAMBAH KERANJANG */}
-      {showSuccess && (
-        <View style={styles.successWrap}>
-          <View style={styles.successCard}>
-            <View style={styles.successIcon}>
-              <Ionicons name="checkmark-circle" size={26} color="#16a34a" />
+      {/* MODAL SUKSES TAMBAH KERANJANG */}
+      <Modal
+        transparent
+        visible={showSuccess}
+        animationType="fade"
+        onRequestClose={() => setShowSuccess(false)}
+      >
+        <View style={styles.backdrop}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setShowSuccess(false)}
+          />
+          <View style={styles.dialog}>
+            <View style={[styles.dialogIcon, { backgroundColor: '#ecfccb' }]}>
+              <Ionicons name="cart-outline" size={26} color={BRAND} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.successTitle}>Berhasil ditambahkan</Text>
-              <Text style={styles.successDesc} numberOfLines={2}>
-                Produk sudah masuk ke keranjang belanja kamu.
-              </Text>
-            </View>
-            <Pressable onPress={() => setShowSuccess(false)} hitSlop={8}>
-              <Ionicons name="close" size={18} color="#6b7280" />
-            </Pressable>
-          </View>
+            <Text style={styles.dialogTitle}>Produk ditambahkan</Text>
+            <Text style={styles.dialogText}>
+              Produk berhasil dimasukkan ke keranjang belanja Anda.
+            </Text>
 
-          <View style={styles.successActions}>
-            <Pressable
-              style={[styles.successBtn, styles.successBtnOutline]}
-              onPress={() => setShowSuccess(false)}
-            >
-              <Text style={styles.successBtnOutlineText}>Lanjut Belanja</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.successBtn, styles.successBtnPrimary]}
-              onPress={onGoToCart}
-            >
-              <Text style={styles.successBtnPrimaryText}>Lihat Keranjang</Text>
-            </Pressable>
+            <View style={styles.actions}>
+              <Pressable
+                onPress={() => setShowSuccess(false)}
+                style={styles.btnOutline}
+                hitSlop={8}
+              >
+                <Text style={styles.btnOutlineText}>Lanjut Belanja</Text>
+              </Pressable>
+              <Pressable
+                onPress={onGoToCart}
+                style={styles.btnPrimary}
+                hitSlop={8}
+              >
+                <Text style={styles.btnPrimaryText}>Lihat Keranjang</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-      )}
+      </Modal>
+
+      {/* MODAL WAJIB LOGIN (mirip popup logout) */}
+      <Modal
+        transparent
+        visible={showLoginModal}
+        animationType="fade"
+        onRequestClose={() => setShowLoginModal(false)}
+      >
+        <View style={styles.backdrop}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setShowLoginModal(false)}
+          />
+          <View style={styles.dialog}>
+            <View style={[styles.dialogIcon, { backgroundColor: '#fee2e2' }]}>
+              <Ionicons name="log-in-outline" size={26} color={BRAND} />
+            </View>
+            <Text style={styles.dialogTitle}>Login dibutuhkan</Text>
+            <Text style={styles.dialogText}>{loginMessage}</Text>
+
+            <View style={styles.actions}>
+              <Pressable
+                onPress={() => setShowLoginModal(false)}
+                style={styles.btnOutline}
+                hitSlop={8}
+              >
+                <Text style={styles.btnOutlineText}>Batal</Text>
+              </Pressable>
+              <Pressable onPress={goLogin} style={styles.btnPrimary} hitSlop={8}>
+                <Text style={styles.btnPrimaryText}>Login</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -253,69 +335,71 @@ const styles = StyleSheet.create({
   txtCart: { color: BRAND, fontWeight: '700' },
   txtBuy: { color: '#fff', fontWeight: '700' },
 
-  /* ====== SUCCESS PANEL ====== */
-  successWrap: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 70, // di atas footer
-  },
-  successCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: '#ecfdf3',
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    marginBottom: 8,
-  },
-  successIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#dcfce7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  successTitle: {
-    fontWeight: '700',
-    color: '#166534',
-    fontSize: 14,
-  },
-  successDesc: {
-    fontSize: 12,
-    color: '#4b5563',
-    marginTop: 2,
-  },
-  successActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  successBtn: {
+  // ====== STYLE MODAL (mirip popup logout) ======
+  backdrop: {
     flex: 1,
-    height: 36,
-    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  dialog: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
+    alignItems: 'center',
+  },
+  dialogIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 10,
   },
-  successBtnOutline: {
+  dialogTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111',
+  },
+  dialogText: {
+    fontSize: 13,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginTop: 6,
+    marginBottom: 14,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+    alignSelf: 'stretch',
+  },
+  btnOutline: {
+    flex: 1,
     borderWidth: 1,
-    borderColor: '#166534',
+    borderColor: BRAND,
+    borderRadius: 14,
+    paddingVertical: 10,
+    alignItems: 'center',
     backgroundColor: '#fff',
   },
-  successBtnPrimary: {
-    backgroundColor: '#166534',
+  btnOutlineText: { color: BRAND, fontWeight: '700' },
+  btnPrimary: {
+    flex: 1,
+    backgroundColor: BRAND,
+    borderRadius: 14,
+    paddingVertical: 10,
+    alignItems: 'center',
   },
-  successBtnOutlineText: {
-    color: '#166534',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  successBtnPrimaryText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-  },
+  btnPrimaryText: { color: '#fff', fontWeight: '700' },
 });
