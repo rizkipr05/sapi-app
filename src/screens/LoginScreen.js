@@ -26,8 +26,11 @@ export default function LoginScreen({ navigation }) {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // pastikan di AuthProvider: signin meng-set user + role di context
-  // idealnya signin me-return user yang baru login
+  // Pastikan di AuthProvider:
+  // - signin(username, pwd) akan:
+  //   1) cek user
+  //   2) set user + role ke context
+  //   3) return object user { id, username, role, ... } (idealnya)
   const { signin } = useAuth();
 
   const submit = async () => {
@@ -39,28 +42,29 @@ export default function LoginScreen({ navigation }) {
     try {
       setBusy(true);
 
-      // 👉 signin harus meng-handle role: "buyer" / "seller"
-      // usahakan signin me-return objek user, misalnya:
-      // { id, username, role, ... }
+      // signin diharapkan mengembalikan user yang berhasil login
+      // misal: { id, username, role: 'buyer' | 'seller', ... }
       const loggedUser = await signin(username.trim(), pwd);
 
-      // kalau signin tidak me-return apa-apa, loggedUser bisa undefined,
-      // tapi user di context tetap ter-update; di sini kita cek loggedUser
+      // Jika AuthProvider sudah meng-set user di context
+      // tapi tidak me-return user, loggedUser bisa undefined.
+      // Makanya di bawah kita siapin fallback.
+
       if (loggedUser && loggedUser.role === "seller") {
-        // Seller → pindah ke stack seller
+        // 👉 Role seller → masuk ke stack/tabs penjual
         navigation.reset({
           index: 0,
           routes: [{ name: "SellerRoot" }],
         });
       } else if (loggedUser) {
-        // Buyer (atau role lain selain seller) → ke Home (BuyerTabs)
+        // 👉 Selain seller (buyer / role lain) → ke Home (BuyerTabs)
         navigation.reset({
           index: 0,
           routes: [{ name: "Home" }],
         });
       } else {
-        // fallback kalau signin tidak mengembalikan user
-        // (biar nggak nganggur di halaman login)
+        // 👉 Fallback kalau signin tidak mengembalikan user
+        // (tapi context sudah diset, misalnya)
         navigation.reset({
           index: 0,
           routes: [{ name: "Home" }],
@@ -69,7 +73,7 @@ export default function LoginScreen({ navigation }) {
     } catch (e) {
       Alert.alert(
         "Login gagal",
-        e?.message || "Nama pengguna atau sandi salah."
+        e?.message || "Nama pengguna atau sandi salah.",
       );
     } finally {
       setBusy(false);
@@ -89,7 +93,7 @@ export default function LoginScreen({ navigation }) {
             style={{ width: 130, height: 130 }}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Sava Farm</Text>
+          <Text style={styles.appTitle}>Sapi goo</Text>
           <Text style={styles.appSub}>
             Masuk untuk mulai belanja atau mengelola toko Anda.
           </Text>
@@ -97,15 +101,15 @@ export default function LoginScreen({ navigation }) {
 
         {/* Sheet */}
         <View style={styles.sheet}>
-          {/* Tagline role (visual saja) */}
+          {/* Badge informasi role (visual saja, role asli diambil dari data user) */}
           <View style={styles.roleBadgeRow}>
             <View style={styles.roleBadgeActive}>
               <Ionicons name="person-outline" size={14} color="#fff" />
-              <Text style={styles.roleBadgeActiveText}>Pembeli</Text>
+              <Text style={styles.roleBadgeActiveText}>Akun Pembeli</Text>
             </View>
             <View style={styles.roleBadge}>
               <Ionicons name="storefront-outline" size={14} color={BRAND} />
-              <Text style={styles.roleBadgeText}>Penjual</Text>
+              <Text style={styles.roleBadgeText}>Akun Penjual</Text>
             </View>
           </View>
 
@@ -123,6 +127,7 @@ export default function LoginScreen({ navigation }) {
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
             />
           </View>
 
@@ -140,6 +145,8 @@ export default function LoginScreen({ navigation }) {
               value={pwd}
               onChangeText={setPwd}
               autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={submit}
             />
             <TouchableOpacity onPress={() => setShow((s) => !s)} hitSlop={10}>
               <Ionicons
@@ -156,31 +163,34 @@ export default function LoginScreen({ navigation }) {
 
           {/* Tombol Masuk */}
           <Pressable
-            style={[styles.primaryBtn, busy && { opacity: 0.6 }]}
+            style={[
+              styles.primaryBtn,
+              (busy || !username || !pwd) && { opacity: 0.6 },
+            ]}
             onPress={submit}
-            disabled={busy}
+            disabled={busy || !username.trim() || !pwd}
           >
             <Text style={styles.primaryText}>
               {busy ? "Memproses..." : "Masuk"}
             </Text>
           </Pressable>
 
+          {/* Divider */}
           <Text style={styles.dividerText}>Atau</Text>
 
-          {/* SOSIAL LOGIN */}
+          {/* SOSIAL LOGIN (dummy) */}
           <View style={styles.socials}>
             <View style={styles.iconWrap}>
               <AntDesign name="google" size={26} color="#111" />
             </View>
           </View>
 
+          {/* Tombol ke Register */}
           <Pressable
             style={[styles.primaryBtn, styles.registerBanner]}
             onPress={() => navigation.navigate("Register")}
           >
-            <Text style={[styles.primaryText, { color: "#fff" }]}>
-              Daftar
-            </Text>
+            <Text style={[styles.primaryText, { color: "#fff" }]}>Daftar</Text>
           </Pressable>
         </View>
       </ScrollView>

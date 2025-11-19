@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import React, { useMemo, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import React, { useMemo, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -10,31 +10,31 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { useAuth } from '../context/AuthProvider';
-import { useProducts } from '../context/ProductProvider';
+} from "react-native";
+import { useAuth } from "../context/AuthProvider";
+import { useProducts } from "../context/ProductProvider";
 
-const BRAND = '#3f4d0b';
-const CARD_W = (Dimensions.get('window').width - 16 * 2 - 12) / 2;
+const BRAND = "#3f4d0b";
+const CARD_W = (Dimensions.get("window").width - 16 * 2 - 12) / 2;
 
 function currency(n) {
-  const num = typeof n === 'string' ? Number(n) : (n ?? 0);
+  const num = typeof n === "string" ? Number(n) : (n ?? 0);
   const safe = Number.isFinite(num) ? num : 0;
-  return 'Rp ' + safe.toLocaleString('id-ID');
+  return "Rp " + safe.toLocaleString("id-ID");
 }
 
 /** ========== Gambar sapi lokal ========== */
 const COWS = [
-  require('../../assets/images/sapi-limosin.jpeg'),
-  require('../../assets/images/images.jpeg'),
-  require('../../assets/images/images (1).jpeg'),
-  require('../../assets/images/images (2).jpeg'),
+  require("../../assets/images/sapi-limosin.jpeg"),
+  require("../../assets/images/images.jpeg"),
+  require("../../assets/images/images (1).jpeg"),
+  require("../../assets/images/images (2).jpeg"),
 ];
 
 const cowImg = (i = 0) => COWS[i % COWS.length];
 
 export default function HomeScreen() {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
   const { user } = useAuth(); // cek login
   const nav = useNavigation();
   const { products, ready } = useProducts();
@@ -43,13 +43,13 @@ export default function HomeScreen() {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return products;
-    return products.filter((it) => (it?.title || '').toLowerCase().includes(s));
+    return products.filter((it) => (it?.title || "").toLowerCase().includes(s));
   }, [q, products]);
 
   const renderItem = ({ item, index }) => (
     <Pressable
       style={styles.card}
-      onPress={() => nav.navigate('ProductDetail', { product: item })}
+      onPress={() => nav.navigate("ProductDetail", { product: item })}
     >
       {/* Selalu pakai gambar lokal */}
       <Image source={cowImg(index)} style={styles.thumb} />
@@ -65,11 +65,11 @@ export default function HomeScreen() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f7ef' }}>
+    <View style={{ flex: 1, backgroundColor: "#f5f7ef" }}>
       {/* HEADER --------------------------------------- */}
       <View style={styles.top}>
-        <Text style={{ fontWeight: '700', fontSize: 16 }}>
-          Hai, {user?.username || 'Pengunjung'}
+        <Text style={{ fontWeight: "700", fontSize: 16 }}>
+          Hai, {user?.username || "Pengunjung"}
         </Text>
 
         {/* ========== LOGIC LOGIN ========== */}
@@ -78,16 +78,9 @@ export default function HomeScreen() {
           <View style={styles.topIcons}>
             <Pressable
               style={styles.actionBtn}
-              onPress={() => nav.navigate('Chats')}
+              onPress={() => nav.navigate("Chats")}
             >
               <Ionicons name="chatbubbles-outline" size={20} color="#111" />
-            </Pressable>
-
-            <Pressable
-              style={styles.actionBtn}
-              onPress={() => nav.navigate('Favorites')}
-            >
-              <Ionicons name="heart-outline" size={20} color="#111" />
             </Pressable>
           </View>
         ) : (
@@ -95,14 +88,14 @@ export default function HomeScreen() {
           <View style={styles.topAuth}>
             <Pressable
               style={styles.authBtn}
-              onPress={() => nav.navigate('Login')}
+              onPress={() => nav.navigate("Login")}
             >
               <Text style={styles.authText}>Masuk</Text>
             </Pressable>
 
             <Pressable
               style={[styles.authBtn, styles.authBtnOutline]}
-              onPress={() => nav.navigate('Register')}
+              onPress={() => nav.navigate("Register")}
             >
               <Text style={[styles.authText, styles.authTextOutline]}>
                 Daftar
@@ -125,7 +118,7 @@ export default function HomeScreen() {
           autoCorrect={false}
         />
         {q ? (
-          <Pressable onPress={() => setQ('')}>
+          <Pressable onPress={() => setQ("")}>
             <Ionicons name="close-circle" size={18} color="#9aa0a6" />
           </Pressable>
         ) : null}
@@ -142,9 +135,9 @@ export default function HomeScreen() {
         renderItem={renderItem}
         ListEmptyComponent={
           ready ? (
-            <View style={{ alignItems: 'center', marginTop: 40 }}>
+            <View style={{ alignItems: "center", marginTop: 40 }}>
               <Ionicons name="search" size={32} color="#9aa0a6" />
-              <Text style={{ color: '#6b7280', marginTop: 6 }}>
+              <Text style={{ color: "#6b7280", marginTop: 6 }}>
                 Tidak ada hasil untuk “{q}”
               </Text>
             </View>
@@ -158,26 +151,26 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   top: {
     height: 70,
-    backgroundColor: '#f8f6ee',
+    backgroundColor: "#f8f6ee",
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
   // BUTTON LOGIN REGISTER
   topAuth: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   authBtn: {
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
   },
   authBtnOutline: {
     backgroundColor: BRAND,
@@ -185,28 +178,28 @@ const styles = StyleSheet.create({
   },
   authText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#111',
+    fontWeight: "700",
+    color: "#111",
   },
   authTextOutline: {
-    color: '#fff',
+    color: "#fff",
   },
 
   // ICONS LOGIN
   topIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   actionBtn: {
     width: 34,
     height: 34,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 4,
   },
@@ -215,28 +208,28 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderColor: "#e5e7eb",
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingHorizontal: 12,
     height: 40,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
 
   card: {
     width: CARD_W,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 12,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 6,
   },
-  thumb: { width: '100%', height: 110, backgroundColor: '#eee' },
-  cardTitle: { fontWeight: '700', color: '#111' },
-  cardPrice: { color: '#111' },
-  cardMeta: { color: '#6b7280', fontSize: 12 },
+  thumb: { width: "100%", height: 110, backgroundColor: "#eee" },
+  cardTitle: { fontWeight: "700", color: "#111" },
+  cardPrice: { color: "#111" },
+  cardMeta: { color: "#6b7280", fontSize: 12 },
 });

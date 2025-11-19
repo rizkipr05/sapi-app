@@ -24,6 +24,7 @@ export default function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState("");
   const [pwd, setPwd] = useState("");
   const [pwd2, setPwd2] = useState("");
+  const [role, setRole] = useState("buyer");
   const [show1, setShow1] = useState(false);
   const [show2, setShow2] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -31,7 +32,7 @@ export default function RegisterScreen({ navigation }) {
 
   const disabled = useMemo(
     () => busy || !username.trim() || !pwd || !pwd2,
-    [busy, username, pwd, pwd2]
+    [busy, username, pwd, pwd2],
   );
 
   const submit = async () => {
@@ -50,20 +51,37 @@ export default function RegisterScreen({ navigation }) {
 
     try {
       setBusy(true);
-      // daftar akun pembeli (role buyer diatur di AuthProvider)
-      await signup(username.trim(), pwd);
-      Alert.alert("Berhasil", "Akun berhasil dibuat, silakan masuk.", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("Login"), // langsung arahkan ke Login
-        },
-      ]);
+
+      // ✅ sekarang kirim role juga (buyer / seller
+      await signup(username.trim(), pwd, role);
+
+      const labelRole = role === "seller" ? "penjual" : "pembeli";
+
+      Alert.alert(
+        "Berhasil",
+        `Akun ${labelRole} berhasil dibuat, silakan masuk.`,
+        [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate("Login"),
+          },
+        ],
+      );
     } catch (e) {
       Alert.alert("Daftar gagal", e?.message || "Gagal daftar");
     } finally {
       setBusy(false);
     }
   };
+
+  const infoText1 =
+    role === "buyer"
+      ? "Akun yang didaftarkan lewat halaman ini akan menjadi akun pembeli untuk belanja sapi di Sapi goo."
+      : "Akun yang didaftarkan lewat halaman ini akan menjadi akun penjual untuk mengelola dan menjual sapi di Sapi goo.";
+  const infoText2 =
+    role === "buyer"
+      ? "Jika ingin menjadi penjual, Anda bisa mendaftarkan akun baru sebagai penjual."
+      : "Pastikan data akun penjual ini digunakan oleh pengelola toko/supplier sapi yang resmi.";
 
   return (
     <KeyboardAvoidingView
@@ -80,28 +98,66 @@ export default function RegisterScreen({ navigation }) {
           />
           <Text style={styles.appTitle}>Buat Akun Baru</Text>
           <Text style={styles.appSub}>
-            Daftar untuk mulai belanja sapi di Sava Farm.
+            Daftar untuk mulai {role === "buyer" ? "belanja" : "berjualan"} sapi
+            di Sapi goo.
           </Text>
         </View>
 
         <View style={styles.sheet}>
-          {/* Badge info role (informasi saja) */}
+          {/* Badge pilihan role */}
           <View style={styles.roleBadgeRow}>
-            <View style={styles.roleBadgeActive}>
-              <Ionicons name="person-add-outline" size={14} color="#fff" />
-              <Text style={styles.roleBadgeActiveText}>Registrasi Pembeli</Text>
-            </View>
-            <View style={styles.roleBadge}>
-              <Ionicons name="storefront-outline" size={14} color={BRAND} />
-              <Text style={styles.roleBadgeText}>Penjual diatur admin</Text>
-            </View>
+            <Pressable
+              onPress={() => setRole("buyer")}
+              style={[
+                styles.roleBadgeBase,
+                role === "buyer" ? styles.roleBadgeActive : styles.roleBadge,
+              ]}
+            >
+              <Ionicons
+                name="person-add-outline"
+                size={14}
+                color={role === "buyer" ? "#fff" : BRAND}
+              />
+              <Text
+                style={
+                  role === "buyer"
+                    ? styles.roleBadgeActiveText
+                    : styles.roleBadgeText
+                }
+              >
+                Registrasi Pembeli
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setRole("seller")}
+              style={[
+                styles.roleBadgeBase,
+                role === "seller" ? styles.roleBadgeActive : styles.roleBadge,
+              ]}
+            >
+              <Ionicons
+                name="storefront-outline"
+                size={14}
+                color={role === "seller" ? "#fff" : BRAND}
+              />
+              <Text
+                style={
+                  role === "seller"
+                    ? styles.roleBadgeActiveText
+                    : styles.roleBadgeText
+                }
+              >
+                Registrasi Penjual
+              </Text>
+            </Pressable>
           </View>
 
           {/* Username */}
           <View style={styles.labelRow}>
             <Text style={styles.label}>Nama Pengguna</Text>
           </View>
-          <View style={styles.inputRow}>
+          <View className="input-row" style={styles.inputRow}>
             <Ionicons name="person-outline" size={18} color="#666" />
             <TextInput
               placeholder="Nama Pengguna"
@@ -171,21 +227,11 @@ export default function RegisterScreen({ navigation }) {
 
           {/* Info box tentang role */}
           <View style={styles.infoBox}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={18}
-              color={BRAND}
-            />
+            <Ionicons name="shield-checkmark-outline" size={18} color={BRAND} />
             <View style={{ marginLeft: 8, flex: 1 }}>
               <Text style={styles.infoTitle}>Informasi Role Akun</Text>
-              <Text style={styles.infoText}>
-                Akun yang didaftarkan lewat halaman ini akan menjadi akun
-                pembeli.
-              </Text>
-              <Text style={styles.infoText}>
-                Jika ingin menjadi penjual (seller), hubungi admin untuk
-                mengaktifkan role penjual pada akun Anda.
-              </Text>
+              <Text style={styles.infoText}>{infoText1}</Text>
+              <Text style={styles.infoText}>{infoText2}</Text>
             </View>
           </View>
 
@@ -202,7 +248,11 @@ export default function RegisterScreen({ navigation }) {
             accessibilityLabel="Tombol daftar"
           >
             <Text style={styles.primaryText}>
-              {busy ? "Memproses..." : "Daftar"}
+              {busy
+                ? "Memproses..."
+                : role === "buyer"
+                  ? "Daftar sebagai Pembeli"
+                  : "Daftar sebagai Penjual"}
             </Text>
           </Pressable>
 
@@ -276,13 +326,15 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
-  roleBadgeActive: {
+  roleBadgeBase: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
+  },
+  roleBadgeActive: {
     backgroundColor: BRAND,
   },
   roleBadgeActiveText: {
@@ -291,12 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   roleBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
     backgroundColor: "#e5ead4",
   },
   roleBadgeText: {
